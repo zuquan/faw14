@@ -34,6 +34,8 @@ private:
 	Node* _parent;
 	Node* _leftChild;
 	Node* _rightChild;
+	friend class ESTree;
+	friend class AdvancedDSTree;
 };
 
 class ESTreeNode :public Node
@@ -44,7 +46,16 @@ private:
 	//internal*/
 	int _add;
 	int _min;
+	int _leafNum;
 	friend class ESTree;
+
+public:
+	ESTreeNode(int leafNum)
+	{
+		_leafNum = leafNum;
+		_add = 0;
+		_min = 0;
+	}
 };
 
 class ESTree
@@ -53,7 +64,35 @@ private:
 	ESTreeNode* _root;
 	int findMinBj(int k);
 	void decreaseAdd(int k, int j);
+
+	//auxiluary fuction
+	void buildTree(ESTreeNode* &currentRoot, ESTreeNode* parent, int min, int max)
+	{
+		currentRoot = new ESTreeNode(max - min + 1);
+		currentRoot->_parent = parent;
+		if (min == max)
+		{
+			currentRoot->_leftChild = NULL;
+			currentRoot->_rightChild = NULL;
+		}
+		else
+		{
+			int total = max - min + 1;
+			int half = (total + 1) / 2;
+			int mid = min + half - 1;
+			buildTree((ESTreeNode* &)(currentRoot->_leftChild), currentRoot, min, mid);
+			buildTree((ESTreeNode* &)(currentRoot->_rightChild), currentRoot, mid + 1, max);
+		}
+	}
+	void verifiyESTree(ESTreeNode* root, int& num);
+
 public:
+	ESTree(int rangeOfY)
+	{
+		buildTree(_root, NULL, 1, rangeOfY);
+		/*int a = 1;
+		verifiyESTree(_root, a);*/
+	}
 	Msg insertVariable(int k);
 };
 
@@ -73,11 +112,18 @@ private:
 	list<X> lp;
 	list<X> update;
 
-	ESTree _esTree;
+	ESTree* _pESTree;
 
 public:
+	AdvancedDSNode(int rangeOfY)
+	{
+		//cout << "create estree " << rangeOfY << endl;
+		_pESTree = new ESTree(rangeOfY);
+	}
 	void receive(Msg m);
 	void initESTree();
+
+
 };
 
 class AdvancedDSTree
@@ -85,12 +131,25 @@ class AdvancedDSTree
 private:
 	AdvancedDSNode* _root;
 public:
+	AdvancedDSTree(int rangeOfY)
+	{
+		_root = new AdvancedDSNode(rangeOfY);
+	}
 	void insertX(X x);
 	bool isXMatched(X x);
 	bool isYMatched(Y y);
 	Y queryXMate(X x);
 	X queryYMate(Y y);
+
 };
 
 
-
+void ESTree::verifiyESTree(ESTreeNode* root, int& num)
+{
+	if (root != NULL)
+	{
+		cout << num++ << " : " << root->_leafNum << endl;
+		verifiyESTree((ESTreeNode*)root->_leftChild, num);
+		verifiyESTree((ESTreeNode*)root->_rightChild, num);
+	}
+}
