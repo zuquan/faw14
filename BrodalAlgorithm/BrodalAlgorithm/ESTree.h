@@ -2,6 +2,7 @@
 
 #include "Basic.h"
 
+
 class ESTreeNode 
 {
 private:
@@ -33,11 +34,13 @@ private:
 
 	//auxiluary fuction
 	void buildTree(ESTreeNode* &currentRoot, ESTreeNode* parent, int min, int max);
-	void verifiyESTree(ESTreeNode* root, int& num);
-
+	void updateMin(ESTreeNode*);
+	stack<ESTreeNode*> getPathElements(ESTreeNode*);
 public:
 	ESTree(int rangeOfY);
 	Msg insertVariable(int k);
 	friend class AdvancedDSTreeNode;
+
+	void verifiyESTree(ESTreeNode* root, int& num);
 };
 

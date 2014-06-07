@@ -4,6 +4,7 @@
 #include<set>
 #include<list>
 #include<vector>
+#include<stack>
 
 using namespace std;
 

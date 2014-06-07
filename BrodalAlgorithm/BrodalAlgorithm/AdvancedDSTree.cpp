@@ -163,7 +163,8 @@ bool AdvancedDSTree::insertX(X &x)
 	
 	// to do the op of insert variable
 	//transfer X to (1,k)
-	leaf->_pESTree->insertVariable(14);
+	leaf->_pESTree->insertVariable(3);
+
 	return true;
 }
 
