@@ -3,26 +3,32 @@
 #include"ESTree.h"
 
 
-class AdvancedDSNode : public Node
+class AdvancedDSTreeNode /*: public Node*/
 {
 private:
-	set<X> _variables;
-	set<X> _variables2;//variables'
-	set<X> _matched;
-	set<X> _matching;
-	set<X> _transferred;
-	set<X> _transferred2;//transferred'
-	set<X> _infeasible;
-	set<X> _matched2;//matched'
+	vector<X> _variables;
+	vector<X> _variables2;//variables'
+	vector<X> _matched;
+	vector<X> _matching;
+	vector<X> _transferred;
+	vector<X> _transferred2;//transferred'
+	vector<X> _infeasible;
+	vector<X> _matched2;//matched'
 
 	vector<Y> _values;
 	list<X> lp;//W
 	list<X> update;
 
 	ESTree* _pESTree;
+
+	AdvancedDSTreeNode* _parent;
+	AdvancedDSTreeNode* _leftChild;
+	AdvancedDSTreeNode* _rightChild;
+	void deleteCurrentESTree(ESTreeNode* currentNode);
+	void deleteCurrentESTree();
 	
 public:
-	AdvancedDSNode(vector<Y>);
+	AdvancedDSTreeNode(vector<Y>);
 	void receive(Msg m);
 	void initESTree();
 	Y getIntervalStart();
@@ -32,14 +38,14 @@ public:
 class AdvancedDSTree
 {
 private:
-	AdvancedDSNode* _root;
-	AdvancedDSNode* locateLeafOfX(X x);	
+	AdvancedDSTreeNode* _root;
+	AdvancedDSTreeNode* locateLeafOfX(X x);	
 	bool adjustXToProper(X& x);//success or not
-	void splitDSNode(AdvancedDSNode*, X);
+	void splitDSNode(AdvancedDSTreeNode*, X);
 	
 public:
 	AdvancedDSTree();
-	void insertX(X x);
+	bool insertX(X &x);
 	bool isXMatched(X x);
 	bool isYMatched(Y y);
 	Y queryXMate(X x);

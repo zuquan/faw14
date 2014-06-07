@@ -9,8 +9,19 @@ bool cmp(Y y1, Y y2)
 	return y1._y < y2._y;
 }
 
+ostream& operator<<(ostream& os, const Y& rhs)
+{
+	os << rhs._y;
+	return os;
+}
 
-AdvancedDSNode::AdvancedDSNode(vector<Y> allY)
+ostream& operator<<(ostream& os, const X& rhs)
+{
+	os <<"X: "<< rhs._id<<" "<<rhs._begin<<" "<<rhs._end;
+	return os;
+}
+
+AdvancedDSTreeNode::AdvancedDSTreeNode(vector<Y> allY)
 {
 	//cout << "create estree " << rangeOfY << endl;
 	_pESTree = new ESTree(allY.size());
@@ -19,66 +30,84 @@ AdvancedDSNode::AdvancedDSNode(vector<Y> allY)
 	{
 		_values.push_back(allY[i]);
 	}
+	_leftChild = NULL;
+	_rightChild = NULL;
+	_parent = NULL;
 }
 
 AdvancedDSTree::AdvancedDSTree()
 {
-	_root = new AdvancedDSNode(allExistingY);
+	_root = new AdvancedDSTreeNode(allExistingY);
 }
 
-void AdvancedDSTree::insertX(X x)
-{
 
-}
-
-Y AdvancedDSNode::getIntervalStart()
+Y AdvancedDSTreeNode::getIntervalStart()
 {
 	return _values[0];
 }
 
-AdvancedDSNode* AdvancedDSTree::locateLeafOfX(X x)
+AdvancedDSTreeNode* AdvancedDSTree::locateLeafOfX(X x)
 {
-	AdvancedDSNode* tmp = _root;
-	while (x._begin._y != tmp->getIntervalStart()._y)
-	{
-		if (tmp->_rightChild != NULL)
+	// assert: x's begin and end have been adjusted to existing value;
+	AdvancedDSTreeNode* node = _root;	
+	while (x._begin._y != node->getIntervalStart()._y)
+	{		
+		if (node->_rightChild != NULL)
 		{
-			if (x._begin._y >= ((AdvancedDSNode*)tmp->_rightChild)->getIntervalStart()._y)
+			if (x._begin._y >= ((AdvancedDSTreeNode*)node->_rightChild)->getIntervalStart()._y)
 			{
-				tmp = (AdvancedDSNode*)tmp->_rightChild;
+				node = (AdvancedDSTreeNode*)node->_rightChild;
 			}
 			else
 			{
-				tmp = (AdvancedDSNode*)tmp->_leftChild;
+				node = (AdvancedDSTreeNode*)node->_leftChild;
 			}
 		}
 		else // assert there is no case that right child is NULL and left child is not NULL.
 		{
-			splitDSNode(tmp, x);
-			return (AdvancedDSNode*)tmp->_rightChild;
+			splitDSNode(node, x);			
+			node = (AdvancedDSTreeNode*)node->_rightChild;
 		}
 	}
-	return tmp;
+	while (node->_leftChild != NULL)
+	{
+		node->_variables.push_back(x);
+		node = node->_leftChild;
+	}	
+	
+	AdvancedDSTreeNode* tmp = node;
+	while (tmp != NULL)
+	{
+		tmp->_variables.push_back(x);
+		tmp = tmp->_parent;
+	}
+	return node;
 }
 
-void AdvancedDSTree::splitDSNode(AdvancedDSNode* node, X x)
+void AdvancedDSTree::splitDSNode(AdvancedDSTreeNode* node, X x)
 {
-	vector<Y> leftVec, rightVec;
+	vector<Y> leftVecY, rightVecY;
 	int i = 0;
 	while (node->_values[i]._y < x._begin._y)
 	{
-		leftVec.push_back(node->_values[i]);
+		leftVecY.push_back(node->_values[i]);
 		i++;
 	}
-	while (i < node->_values.size())
+	while (i < (int)node->_values.size())
 	{
-		rightVec.push_back(node->_values[i]);
+		rightVecY.push_back(node->_values[i]);
 		i++;
-	}
+	}	
 
-	AdvancedDSNode* leftChild = new AdvancedDSNode(leftVec);
-	AdvancedDSNode* rightChild = new AdvancedDSNode(rightVec);
+	AdvancedDSTreeNode* leftChild = new AdvancedDSTreeNode(leftVecY);
+	AdvancedDSTreeNode* rightChild = new AdvancedDSTreeNode(rightVecY);
 
+	//_pESTree = new ESTree(rightVecY.size())
+	node->deleteCurrentESTree();
+	node->_pESTree = new ESTree(rightVecY.size());
+
+	leftChild->_variables = node->_variables;	// copy the variables from the parent
+	
 	node->_leftChild = leftChild;
 	node->_rightChild = rightChild;
 	leftChild->_parent = node;
@@ -118,5 +147,39 @@ bool AdvancedDSTree::adjustXToProper(X& x)
 	}
 	x._begin._y = tempBegin;
 	x._end._y = allExistingY[i]._y;
+	cout << x<< endl;
 	return true;
+}
+
+bool AdvancedDSTree::insertX(X &x)
+{
+	if (adjustXToProper(x) == false)
+	{
+		cout << x._id << " insert fail" << endl;
+		return false;
+	}
+	AdvancedDSTreeNode* leaf = locateLeafOfX(x);
+	//leaf->_variables.push_back(x);
+	
+	// to do the op of insert variable
+	//transfer X to (1,k)
+	leaf->_pESTree->insertVariable(14);
+	return true;
+}
+
+
+void AdvancedDSTreeNode::deleteCurrentESTree(ESTreeNode* currentNode)
+{
+	if (currentNode == NULL)
+	{
+		return;
+	}
+	deleteCurrentESTree(currentNode->_rightChild);
+	deleteCurrentESTree(currentNode->_leftChild);
+	delete currentNode;
+}
+
+void AdvancedDSTreeNode::deleteCurrentESTree()
+{
+	deleteCurrentESTree(this->_pESTree->_root);
 }
