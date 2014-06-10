@@ -15,9 +15,17 @@ struct Y
 	{
 		return this->_y < y._y;
 	}
+	bool operator<=(const Y& y)
+	{
+		return this->_y <= y._y;
+	}
 	bool operator>(const Y& y)
 	{
 		return this->_y > y._y;
+	}
+	bool operator>=(const Y& y)
+	{
+		return this->_y >= y._y;
 	}
 	bool operator==(const Y& y)
 	{
@@ -39,6 +47,10 @@ struct X
 	int _id;
 	Y _begin;
 	Y _end;
+	bool operator==(const X& x)
+	{
+		return this->_id == x._id && this->_begin == x._begin && this->_end == x._end;
+	}
 };
 ostream& operator<<(ostream& os, const X& rhs);
 

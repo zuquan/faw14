@@ -31,16 +31,23 @@ private:
 	int findMinBj(int k);
 	void decreaseAdd(int k, int j);
 	ESTreeNode* locateLeafK(int k);
+	ESTreeNode* locateLeafJ(ESTreeNode*);
+	void updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ);
 
 	//auxiluary fuction
 	void buildTree(ESTreeNode* &currentRoot, ESTreeNode* parent, int min, int max);
 	void updateMin(ESTreeNode*);
 	stack<ESTreeNode*> getPathElements(ESTreeNode*);
+
+	int getIndex(ESTreeNode*); //the index of the first leaf is 1
 public:
 	ESTree(int rangeOfY);
-	Msg insertVariable(int k);
+	int insertVariable(int k);	//if the return value == m+1,then success, else failure
 	friend class AdvancedDSTreeNode;
 
 	void verifiyESTree(ESTreeNode* root, int& num);
+	void unitTest(string str);
+
+	int allLeafNum();
 };
 

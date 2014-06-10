@@ -7,15 +7,16 @@ class AdvancedDSTreeNode /*: public Node*/
 {
 private:
 	vector<X> _variables;
-	vector<X> _variables2;//variables'
-	vector<X> _matched;
-	vector<X> _matching;
-	vector<X> _transferred;
-	vector<X> _transferred2;//transferred'
-	vector<X> _infeasible;
-	vector<X> _matched2;//matched'
+		vector<X> _variables2;//variables'
+		vector<X> _matched;
+		vector<X> _matching;
+		vector<X> _transferred;
+		vector<X> _transferred2;//transferred'
+		vector<X> _infeasible;
+		vector<X> _matched2;//matched'
 
 	vector<Y> _values;
+	
 	list<X> lp;//W
 	list<X> update;
 
@@ -26,6 +27,7 @@ private:
 	AdvancedDSTreeNode* _rightChild;
 	void deleteCurrentESTree(ESTreeNode* currentNode);
 	void deleteCurrentESTree();
+	int sizeOfY(Y start, Y end);
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
@@ -33,6 +35,7 @@ public:
 	void initESTree();
 	Y getIntervalStart();
 	friend class AdvancedDSTree;
+	Msg insertX(X x);
 };
 
 class AdvancedDSTree
@@ -42,6 +45,7 @@ private:
 	AdvancedDSTreeNode* locateLeafOfX(X x);	
 	bool adjustXToProper(X& x);//success or not
 	void splitDSNode(AdvancedDSTreeNode*, X);
+	void updateAuxSet4Split(AdvancedDSTreeNode*);
 	
 public:
 	AdvancedDSTree();

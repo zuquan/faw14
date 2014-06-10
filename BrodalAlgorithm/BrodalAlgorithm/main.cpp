@@ -5,7 +5,7 @@
 
 using namespace std;
 
-vector<Y> allExistingY;
+vector<Y> allExistingY;	// TBD: use BST to store Y nodes
 vector<X> allExistingX;
 
 int main()
