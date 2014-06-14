@@ -54,7 +54,7 @@ int main()
 		{
 				  X x;
 				  in >> x._id >> x._begin._y >> x._end._y;
-				  if (x._id == 10)
+				  if (x._id == 27)
 				  {
 					  int a = 0;
 				  }
@@ -80,7 +80,7 @@ int main()
 		}break;
 		case '6':
 		{
-
+					
 		}break;
 		case '7':
 		{
@@ -92,6 +92,14 @@ int main()
 		}
 
 	}
+	Y y;
+	y._y = 1;
+	X x;
+	x._id = 1;
+	x._begin = y;
+	x._end = y;
+
+	cout << pTree->queryXMate(x)<< endl;
 	cout << "end" << endl;
 
 

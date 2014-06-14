@@ -32,7 +32,8 @@ private:
 	void decreaseAdd(int k, int j);
 	ESTreeNode* locateLeafK(int k);
 	ESTreeNode* locateLeafJ(ESTreeNode*);
-	void updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ);
+	void updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff);
+	
 
 	//auxiluary fuction
 	void buildTree(ESTreeNode* &currentRoot, ESTreeNode* parent, int min, int max);
@@ -49,5 +50,7 @@ public:
 	void unitTest(string str);
 
 	int allLeafNum();
+
+	void deleteTheX(int);
 };
 
