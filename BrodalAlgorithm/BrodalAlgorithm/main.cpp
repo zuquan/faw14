@@ -42,6 +42,10 @@ int main()
 			in.get(s, 20, '\n');
 			continue;
 		}
+		if (command == '$')
+		{
+			break;
+		}
 			
 		switch (command)
 		{
@@ -50,6 +54,10 @@ int main()
 		{
 				  X x;
 				  in >> x._id >> x._begin._y >> x._end._y;
+				  if (x._id == 10)
+				  {
+					  int a = 0;
+				  }
 				  pTree->insertX(x);
 		}break;
 

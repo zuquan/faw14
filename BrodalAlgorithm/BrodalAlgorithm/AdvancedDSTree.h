@@ -7,18 +7,16 @@ class AdvancedDSTreeNode /*: public Node*/
 {
 private:
 	vector<X> _variables;
-		vector<X> _variables2;//variables'
-		vector<X> _matched;
-		vector<X> _matching;
-		vector<X> _transferred;
-		vector<X> _transferred2;//transferred'
-		vector<X> _infeasible;
-		vector<X> _matched2;//matched'
-
+	vector<X> _matched;
+	vector<X> _transferred;
+	vector<X> _infeasible;
 	vector<Y> _values;
-	
-	list<X> lp;//W
-	list<X> update;
+		vector<X> _matching;
+		list<X> lp;//W
+		list<X> update;
+		//vector<X> _variables2;//variables'
+		//vector<X> _transferred2;//transferred'
+		//vector<X> _matched2;//matched'
 
 	ESTree* _pESTree;
 

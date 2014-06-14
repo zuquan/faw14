@@ -32,12 +32,12 @@ void ESTree::buildTree(ESTreeNode* &currentRoot, ESTreeNode* parent, int min, in
 
 void ESTree::unitTest(string str)
 {
-	if (str == "ESTREE")
+	/*if (str == "ESTREE")
 	{		
 		cout << "ID" << '\t' << "Node/Leaf " << '\t' << "_add" << '\t' << "_min" << '\t' << "_leafNum" << endl;
 		int a = 1;
 		verifiyESTree(_root, a);
-	}	
+	}	*/
 }
 
 void ESTree::verifiyESTree(ESTreeNode* root, int& num)
@@ -61,7 +61,7 @@ void ESTree::verifiyESTree(ESTreeNode* root, int& num)
 ESTree::ESTree(int rangeOfY)
 {
 	buildTree(_root, NULL, 0, rangeOfY);
-	cout << "build ESTree of size " << rangeOfY << endl;
+	//cout << "build ESTree of size " << rangeOfY << endl;
 
 	unitTest("ESTREE");	// for test	
 }

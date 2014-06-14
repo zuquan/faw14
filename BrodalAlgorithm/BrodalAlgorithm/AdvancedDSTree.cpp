@@ -9,7 +9,19 @@ bool cmpY(Y y1, Y y2)
 	return y1._y < y2._y;
 }
 
-bool cmpX(X x1, X x2)
+bool cmpX1(X x1, X x2)	//if x1.end == x2.end then (x1<x2 iff x1.id>x2.id)
+{
+	if (x1._end == x2._end)
+	{
+		return x1._id > x2._id;
+	}
+	else
+	{
+		return x1._end < x2._end;
+	}
+}
+
+bool cmpX2(X x1, X x2) //if x1.end == x2.end then (x1.id<x2.id ===> x1<x2 )   
 {
 	if (x1._end == x2._end)
 	{
@@ -20,6 +32,10 @@ bool cmpX(X x1, X x2)
 		return x1._end < x2._end;
 	}
 }
+
+
+//1=>id da de zai qian
+//2=>id xiao de zai qian
 
 ostream& operator<<(ostream& os, const Y& rhs)
 {
@@ -236,17 +252,26 @@ bool AdvancedDSTree::insertX(X &x)
 		}
 		else
 		{
-			Msg tempMsg = leaf->_parent->insertX(msg._a);
-			if (tempMsg._bEmpty == false && tempMsg._aEmpty == false && tempMsg._b == tempMsg._a)
+			
+			if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a)//Fail in R
 			{
-				msg._aEmpty = false;
+				/*msg._aEmpty = false;
 				msg._bEmpty = false;
 				msg._a = tempMsg._a;
 				msg._b = tempMsg._a;
-				msg._c = tempMsg._c;
+				msg._c = tempMsg._c;*/
+				if (msg._c == 1)
+				{
+					leaf->_parent->_transferred.push_back(msg._a);
+				}
+				else
+				{
+					leaf->_parent->_infeasible.push_back(msg._a);
+				}
 			}
 			else
 			{
+				Msg tempMsg = leaf->_parent->insertX(msg._a);
 				msg._b = tempMsg._b;
 				msg._bEmpty = tempMsg._bEmpty;
 				msg._c = tempMsg._c;
@@ -319,13 +344,17 @@ Msg AdvancedDSTreeNode::insertX(X x)
 		Y endY;
 		X preemptedX;
 		endY = (*pESValues)[indexJ - 1];
-		sort(_matched.begin(), _matched.end(), cmpX);
+		//preemptedX with id max
 		if (endY == (*pESValues)[pESValues->size() - 1])
 		{
+			sort(_matched.begin(), _matched.end(), cmpX2);
 			preemptedX = _matched[_matched.size() - 1];
+			vector<X>::iterator it = find(_matched.begin(), _matched.end(), preemptedX);
+			_matched.erase(it);
 		}
 		else
 		{
+			sort(_matched.begin(), _matched.end(), cmpX1);
 			for (int i = 0; i < (int)_matched.size(); i++)//assert: must can find an X with end endY
 			{
 				if (_matched[i]._end == endY)
