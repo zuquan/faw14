@@ -94,7 +94,6 @@ int main()
 					{
 						cout << "x:" << x._id << " is not matched." << endl;
 					}
-					
 		}break;
 		case '7':
 		{
@@ -102,6 +101,20 @@ int main()
 		}break;
 		case '8':
 		{
+					Y y;
+					in >> y._y;
+					if (y._y == 1)
+					{
+						int a = 0;
+					}
+					if (pTree->isYMatched(y) == true)
+					{
+						cout << "y:" << y._y << " is matched with x:" << pTree->queryYMate(y) << endl;
+					}
+					else
+					{
+						cout << "y:" << y._y << " is not matched." << endl;
+					}
 		}break;
 		}
 

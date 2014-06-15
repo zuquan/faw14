@@ -17,9 +17,10 @@ format of Y
 id
 
 example
-1 1 1 8	means an X with id1 begin1 end8 is to be inserted
-8 16	means need to query the mate of the Y with id 16 
-6 10	means need to query the mate of the X with id 10 
+1 1 1 8		means an X with id1 begin1 end8 is to be inserted
+8 16 		means need to query the mate of the Y with id 16 
+6 10 3 9	means need to query the mate of the X with id 10, begin 3 and end 9
 
 Node
-only command 1 with 4 params
+//only command 1 with 4 params
+the format of X in query command should contain all info.

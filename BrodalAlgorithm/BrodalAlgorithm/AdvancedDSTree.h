@@ -11,9 +11,9 @@ private:
 	vector<X> _transferred;
 	vector<X> _infeasible;
 	vector<Y> _values;
-		vector<X> _matching;
-		vector<X> lp;//W
-		vector<X> update;
+	vector<X> _matching;
+	vector<X> lp;//W
+	vector<X> update;
 		//vector<X> _variables2;//variables'
 		//vector<X> _transferred2;//transferred'
 		//vector<X> _matched2;//matched'
@@ -27,7 +27,8 @@ private:
 	void deleteCurrentESTree();
 	int sizeOfY(Y start, Y end);
 
-	void queryUpdateW(vector<X>*);
+	void queryUpdateNodeW();
+	void queryUpdateLeafW();
 	bool isXInLeftInQuery(X);
 	
 	
@@ -49,6 +50,7 @@ private:
 	void splitDSNode(AdvancedDSTreeNode*, X);
 	void updateAuxSet4Split(AdvancedDSTreeNode*);
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
+	X gloverMatchingInLeafForAnY(AdvancedDSTreeNode*, Y);
 	
 public:
 	AdvancedDSTree();
