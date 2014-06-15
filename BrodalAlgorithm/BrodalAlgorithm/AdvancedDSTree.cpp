@@ -223,8 +223,8 @@ bool AdvancedDSTree::insertX(X &x)
 		return false;
 	}
 	AdvancedDSTreeNode* leaf = locateLeafOfX(x);
-	Msg finalMsg;
 	Msg msg = leaf->insertX(x);
+
 	while (leaf->_parent != NULL)//send msg
 	{
 		if (leaf == leaf->_parent->_leftChild)
@@ -298,15 +298,17 @@ bool AdvancedDSTree::insertX(X &x)
 		leaf = leaf->_parent;
 	}
 
-	if (msg._aEmpty == false)
+	if (!(msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a))	// if a==b, do nothing
 	{
-		_root->update.push_back(msg._a);
+		if (msg._aEmpty == false)	// a, which will be added, is not in matched before
+		{
+			_root->update.push_back(msg._a);
+		}
+		if (msg._bEmpty == false)	// b, which will be deleted, is in matched before
+		{
+			_root->update.push_back(msg._b);
+		}
 	}
-	if (msg._bEmpty == false)
-	{
-		_root->update.push_back(msg._b);
-	}
-
 
 	return true;
 }
@@ -420,30 +422,28 @@ Msg AdvancedDSTreeNode::insertX(X x)
 	return msg;
 }
 
+bool AdvancedDSTree::isXMatched(X x)
+{
+	vector<X>::iterator tmp = find(_root->_matched.begin(), _root->_matched.end(), x);
+	if (tmp == _root->_matched.end())	// not in matched set
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 Y AdvancedDSTree::queryXMate(X x)
 {
-	// To Be Checked, move to outside
-	//_root->_matching = _root->_matched;
-
-	//vector<X>::iterator itL;
-	//for (itL = _root->_matching.begin(); itL != _root->_matching.end(); itL++)
-	//{
-	//	vector<X>::iterator itV = find(_root->_leftChild->_matched.begin(), _root->_leftChild->_matched.end(), *itL);
-	//	if (itL->_begin < _root->_leftChild->_values[0] || itV != _root->_leftChild->_matched.end())	// not in W before
-	//	{
-	//		_root->lp.push_back(*itL);
-	//	}
-	//}
-
-
-	AdvancedDSTreeNode *node = _root;
-	//node->update.push_back(x);
-	bool isLeft;
+	// assertion: x is matched.
+	AdvancedDSTreeNode *node = _root;	
 
 	while (node->_leftChild != NULL)
 	{
-		isLeft = node->queryUpdateW(&node->update);
-		if (isLeft)
+		node->queryUpdateW(&node->update);
+		if (node->isXInLeftInQuery(x))
 		{
 			node = node->_leftChild;
 		}
@@ -456,15 +456,18 @@ Y AdvancedDSTree::queryXMate(X x)
 	return gloverMatchingInLeafForAnX(node, x);
 }
 
-bool AdvancedDSTreeNode::queryUpdateW(vector<X>* updateList)
+void AdvancedDSTreeNode::queryUpdateW(vector<X>* updateList)
 {
 	vector<X>::iterator itL;
 	vector<X> leftUpdateList, rightUpdateList;
 	int leftSize = this->_leftChild->_values.size();
-	bool isLeft = false;
-
+	
 	for (itL = updateList->begin(); itL != updateList->end(); itL++)
 	{
+		if ((*itL)._id == 12)
+		{
+			int ad = 0;
+		}
 		vector<X>::iterator itV = find(_matching.begin(), _matching.end(), *itL);
 		if (itV != _matching.end())	// in matching
 		{
@@ -474,18 +477,17 @@ bool AdvancedDSTreeNode::queryUpdateW(vector<X>* updateList)
 				if (isXInLeftInQuery(*itV))
 				{
 					leftUpdateList.push_back(*itV);
-					if (lp.size() > leftSize)	// W's size is greater than L.values
+					if (int(lp.size()) > leftSize)	// W's size is greater than L.values
 					{
 						leftUpdateList.push_back(lp[leftSize]);
 						rightUpdateList.push_back(lp[leftSize]);
-					}	
-					isLeft = true;
+					}						
 				}
 				else
 				{
 					rightUpdateList.push_back(*itV);
 				}
-				lp.erase(itV);
+				lp.erase(tmp);
 			}
 			else
 			{
@@ -502,12 +504,11 @@ bool AdvancedDSTreeNode::queryUpdateW(vector<X>* updateList)
 				if (isXInLeftInQuery(*itL))
 				{
 					leftUpdateList.push_back(*itL);
-					if (lp.size() >= leftSize)	// W's size is greater than L.values
+					if (int(lp.size()) > leftSize)	// W's size is greater than L.values
 					{
 						leftUpdateList.push_back(lp[leftSize]);
 						rightUpdateList.push_back(lp[leftSize]);
 					}
-					isLeft = true;
 				}
 				else
 				{
@@ -532,11 +533,16 @@ bool AdvancedDSTreeNode::queryUpdateW(vector<X>* updateList)
 		this->_rightChild->update.push_back(rightUpdateList[i]);
 	}
 
-	return isLeft;
 }
 
 bool AdvancedDSTreeNode::isXInLeftInQuery(X x)
 {
+	vector<X>::iterator tmp = find(lp.begin(), lp.end(), x);
+	if (tmp == lp.end())	// not in W
+	{
+		return false;
+	}
+
 	// assertion: x \in W
 	bool isLeft = false;
 	int leftValues = 0;
@@ -562,7 +568,6 @@ bool AdvancedDSTreeNode::isXInLeftInQuery(X x)
 
 	return isLeft;
 }
-
 
 Y AdvancedDSTree::gloverMatchingInLeafForAnX(AdvancedDSTreeNode* leaf, X x)
 {
@@ -595,4 +600,39 @@ Y AdvancedDSTree::gloverMatchingInLeafForAnX(AdvancedDSTreeNode* leaf, X x)
 	}
 	return y;
 
+}
+
+void AdvancedDSTree::verifiyDSTree(AdvancedDSTreeNode* root)
+{
+	cout << "debug format: (count, matched.size, transferred.size, infeasible.size)" << endl;
+	deque<AdvancedDSTreeNode*> queue;
+	queue.push_back(root);
+	int count = 1;
+	int level = 0;
+
+	while (queue.empty() == false)
+	{
+		cout << "level" << level++ << ": ";
+		int size = queue.size();
+		for (int i = 0; i < size; i++)
+		{
+			AdvancedDSTreeNode* tmp = queue.front();
+			queue.pop_front();
+			if (tmp->_leftChild != NULL)
+			{
+				queue.push_back(tmp->_leftChild);
+				queue.push_back(tmp->_rightChild);
+			}			
+			cout << '(' << count++ << '|' << tmp->_matched.size() << '|' << tmp->_transferred.size() << '|' << tmp->_infeasible.size() << ')' << '\t';
+		}
+		cout << endl;
+	}
+}
+
+void AdvancedDSTree::unitTestDS(string str)
+{
+	if (str == "DSTREE")
+	{	
+		verifiyDSTree(_root);
+	}	
 }

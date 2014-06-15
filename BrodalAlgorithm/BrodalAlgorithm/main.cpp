@@ -54,7 +54,7 @@ int main()
 		{
 				  X x;
 				  in >> x._id >> x._begin._y >> x._end._y;
-				  if (x._id == 27)
+				  if (x._id == 16)
 				  {
 					  int a = 0;
 				  }
@@ -80,6 +80,20 @@ int main()
 		}break;
 		case '6':
 		{
+					X x;
+					in >> x._id >> x._begin._y >> x._end._y;
+					if (x._id == 1)
+					{
+						int a = 0;
+					}
+					if (pTree->isXMatched(x) == true)
+					{
+						cout << "x:" << x._id << " is matched with y:" << pTree->queryXMate(x) << endl;
+					}
+					else
+					{
+						cout << "x:" << x._id << " is not matched." << endl;
+					}
 					
 		}break;
 		case '7':
@@ -92,14 +106,8 @@ int main()
 		}
 
 	}
-	Y y;
-	y._y = 1;
-	X x;
-	x._id = 1;
-	x._begin = y;
-	x._end = y;
-
-	cout << pTree->queryXMate(x)<< endl;
+	
+	//pTree->unitTestDS("DSTREE");	// unit test
 	cout << "end" << endl;
 
 

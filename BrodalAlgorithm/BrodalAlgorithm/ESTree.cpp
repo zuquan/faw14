@@ -30,33 +30,6 @@ void ESTree::buildTree(ESTreeNode* &currentRoot, ESTreeNode* parent, int min, in
 	}
 }
 
-void ESTree::unitTest(string str)
-{
-	/*if (str == "ESTREE")
-	{
-	cout << "ID" << '\t' << "Node/Leaf " << '\t' << "_add" << '\t' << "_min" << '\t' << "_leafNum" << endl;
-	int a = 1;
-	verifiyESTree(_root, a);
-	}	*/
-}
-
-void ESTree::verifiyESTree(ESTreeNode* root, int& num)
-{
-	if (root != NULL)
-	{
-		if (root->_leftChild == NULL)
-		{
-			cout << num++ << '\t' << "Leaf " << "\t\t" << root->_add << '\t' << root->_min << '\t' << root->_leafNum << endl;
-		}
-		else
-		{
-			cout << num++ << '\t' << "Internal " << '\t' << root->_add << '\t' << root->_min << '\t' << root->_leafNum << endl;
-		}
-		verifiyESTree((ESTreeNode*)root->_leftChild, num);
-		verifiyESTree((ESTreeNode*)root->_rightChild, num);
-	}
-}
-
 // initial ESTree from a size
 ESTree::ESTree(int rangeOfY)
 {
@@ -353,3 +326,31 @@ int ESTree::allLeafNum()
 {
 	return _root->_leafNum;
 }
+
+void ESTree::unitTest(string str)
+{
+	/*if (str == "ESTREE")
+	{
+	cout << "ID" << '\t' << "Node/Leaf " << '\t' << "_add" << '\t' << "_min" << '\t' << "_leafNum" << endl;
+	int a = 1;
+	verifiyESTree(_root, a);
+	}	*/
+}
+
+void ESTree::verifiyESTree(ESTreeNode* root, int& num)
+{
+	if (root != NULL)
+	{
+		if (root->_leftChild == NULL)
+		{
+			cout << num++ << '\t' << "Leaf " << "\t\t" << root->_add << '\t' << root->_min << '\t' << root->_leafNum << endl;
+		}
+		else
+		{
+			cout << num++ << '\t' << "Internal " << '\t' << root->_add << '\t' << root->_min << '\t' << root->_leafNum << endl;
+		}
+		verifiyESTree((ESTreeNode*)root->_leftChild, num);
+		verifiyESTree((ESTreeNode*)root->_rightChild, num);
+	}
+}
+

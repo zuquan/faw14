@@ -27,7 +27,7 @@ private:
 	void deleteCurrentESTree();
 	int sizeOfY(Y start, Y end);
 
-	bool queryUpdateW(vector<X>*);
+	void queryUpdateW(vector<X>*);
 	bool isXInLeftInQuery(X);
 	
 	
@@ -58,6 +58,7 @@ public:
 	Y queryXMate(X x);
 	X queryYMate(Y y);	
 
-
+	void verifiyDSTree(AdvancedDSTreeNode* root);
+	void unitTestDS(string str);
 
 };
