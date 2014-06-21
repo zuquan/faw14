@@ -161,8 +161,8 @@ void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 {
 	if (leafK == leafJ)
 	{
-		/*leafK->_add += diff;
-		updateMin(leafK);*/
+		leafK->_add += diff;
+		updateMin(leafK);
 		return;
 	}
 
@@ -272,17 +272,24 @@ int ESTree::insertVariable(int k)
 	return j;
 }
 
-void ESTree::updateMin(ESTreeNode* leaf)
+void ESTree::updateMin(ESTreeNode* node)
 {
-	//ESTreeNode* leafKMinusOne = locateLeafK(k - 1);//n_k+1=>b_{k-1}-1 so locate k-1
-	//leafKMinusOne->_add--;
-	ESTreeNode* tmp = leaf;
-	int tmpSumU2V = 0;
+	ESTreeNode* tmp = node;
 	while (tmp != NULL)
 	{
-		if (tmpSumU2V < tmp->_min)
-			tmp->_min = tmpSumU2V;
-		tmpSumU2V += tmp->_add;
+		if (tmp->_leftChild != NULL)
+		{
+			int sumL = tmp->_leftChild->_add + tmp->_leftChild->_min;
+			int sumR = tmp->_rightChild->_add + tmp->_rightChild->_min;
+			if (sumL < sumR)
+			{
+				tmp->_min = sumL;
+			}
+			else
+			{
+				tmp->_min = sumR;
+			}
+		}
 		tmp = tmp->_parent;
 	}
 }

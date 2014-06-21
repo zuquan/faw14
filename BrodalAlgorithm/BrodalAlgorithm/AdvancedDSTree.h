@@ -12,11 +12,12 @@ private:
 	vector<X> _infeasible;
 	vector<Y> _values;
 	vector<X> _matching;
+	vector<X> _matched2;//matched'
 	vector<X> lp;//W
 	vector<X> update;
 		//vector<X> _variables2;//variables'
 		//vector<X> _transferred2;//transferred'
-		//vector<X> _matched2;//matched'
+	
 
 	ESTree* _pESTree;
 
@@ -46,7 +47,7 @@ class AdvancedDSTree
 private:
 	AdvancedDSTreeNode* _root;
 	AdvancedDSTreeNode* locateLeafOfX(X x);	
-	bool adjustXToProper(X& x);//success or not
+	
 	void splitDSNode(AdvancedDSTreeNode*, X);
 	void updateAuxSet4Split(AdvancedDSTreeNode*);
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
@@ -58,7 +59,9 @@ public:
 	bool isXMatched(X x);
 	bool isYMatched(Y y);
 	Y queryXMate(X x);
-	X queryYMate(Y y);	
+	X queryYMate(Y y);
+
+	bool adjustXToProper(X& x);//success or not
 
 	void verifiyDSTree(AdvancedDSTreeNode* root);
 	void unitTestDS(string str);
