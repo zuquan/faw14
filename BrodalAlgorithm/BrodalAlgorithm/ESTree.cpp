@@ -245,6 +245,24 @@ void ESTree::deleteVariable(int kOfX)
 	updateBjFromK2J(leafK, lastLeaf, +1);			// update the value of b_j or _add for the leaf or nodes between k and j, implictly.
 }
 
+
+void ESTree::appendVariable(int kOfX)
+{
+	if (kOfX > _root->_leafNum - 1)
+	{
+		kOfX = _root->_leafNum - 1;
+	}
+
+	ESTreeNode* leafK = locateLeafK(kOfX - 1);	// this is the implementation model, so k -> k-1				
+	ESTreeNode* lastLeaf = _root;
+
+	while (lastLeaf->_rightChild != NULL)
+	{
+		lastLeaf = lastLeaf->_rightChild;
+	}
+	updateBjFromK2J(leafK, lastLeaf, -1);			// update the value of b_j or _add for the leaf or nodes between k and j, implictly.
+}
+
 // return j, such that a_j=j
 int ESTree::insertVariable(int k)
 {

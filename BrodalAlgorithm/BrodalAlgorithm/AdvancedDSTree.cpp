@@ -161,17 +161,23 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
 					node->_matched.erase(it);
 					node->insertX(msg._b);
+					vector<X>::iterator itA = find(node->_matched2.begin(), node->_matched2.end(), msg._b);
+					if (itA != node->_matched2.end())
+						{
+							int a =0;
+						}
 		}break;
 		case 2:	// infeasible
 		{
 					node->_matched.push_back(tmpX);
 					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
 					node->_matched.erase(it);
-					if (msg._b._id == 81)
-					{
-						int a = 0;
-					}
 					node->_infeasible.push_back(msg._b);
+					vector<X>::iterator itA = find(node->_matched2.begin(), node->_matched2.end(), msg._b);
+					if (itA != node->_matched2.end())
+						{
+							int a =0;
+						}
 		}break;
 		}
 	}
@@ -262,7 +268,17 @@ bool AdvancedDSTree::insertX(X &x)
 
 	while (leaf->_parent != NULL)//send msg
 	{
-		if (msg._a._id == 152 && msg._b._id == 76)
+		if (msg._a._id == 84 || msg._a._id == 69)
+		{
+			int a = 0;
+		}
+
+		if (msg._a._id == 39)
+		{
+			int a = 0;
+		}
+
+		if (msg._b._id == 39 && msg._c == 2)
 		{
 			int a = 0;
 		}
@@ -281,6 +297,12 @@ bool AdvancedDSTree::insertX(X &x)
 				}*/
 				vector<X>::iterator it = find(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), msg._b);
 				leaf->_parent->_matched.erase(it);
+				
+				vector<X>::iterator itA = find(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), msg._b);
+				if (itA != leaf->_parent->_matched2.end())
+						{
+							int a =0;
+						}
 			}
 			if (msg._c == 2)
 			{
@@ -332,17 +354,7 @@ bool AdvancedDSTree::insertX(X &x)
 						leaf->_parent->removeX(msg);	
 
 						// pull the tempMsg._b back
-						if (tempMsg._c == 1)
-						{
-							vector<X>::iterator it = find(leaf->_parent->_transferred.begin(), leaf->_parent->_transferred.end(), tempMsg._b);
-							leaf->_parent->_transferred.erase(it);	// delete b in the matched set of parent
-						}
-						else if (tempMsg._c == 2)
-						{
-							vector<X>::iterator it = find(leaf->_parent->_infeasible.begin(), leaf->_parent->_infeasible.end(), tempMsg._b);
-							leaf->_parent->_infeasible.erase(it);	// delete b in the matched set of parent
-						}
-						leaf->_parent->insertX(tempMsg._b);
+						leaf->_parent->appendX(tempMsg);
 
 					}
 				}
@@ -396,6 +408,25 @@ void AdvancedDSTreeNode::removeX(Msg m)
 	vector<X>::iterator it1 = find(_matched2.begin(), _matched2.end(), m._b);
 	_matched2.erase(it1);	// delete b in the matched2 set of parent
 }
+
+void AdvancedDSTreeNode::appendX(Msg m)
+{
+
+	if (m._c == 1)
+	{
+		vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), m._b);
+		_transferred.erase(it);	// delete b in the matched set of parent
+	}
+	else if (m._c == 2)
+	{
+		vector<X>::iterator it = find(_infeasible.begin(), _infeasible.end(), m._b);
+		_infeasible.erase(it);	// delete b in the matched set of parent
+	}
+	_pESTree->appendVariable(sizeOfY(_rightChild->_values[0], m._b._end));
+	_matched.push_back(m._b);
+	_matched2.push_back(m._b);
+}
+
 
 // compute the size between the start and the end; 
 // Note: Y may not be integer.
@@ -463,6 +494,10 @@ Msg AdvancedDSTreeNode::insertX(X x)
 	}
 
 	_matched.push_back(x);
+	if (x._id == 39)
+	{
+		int a = 0;
+	}
 	_matched2.push_back(x);
 
 	// END[x]=23, kOfX=22 since ES-Tree values'=[2,30]

@@ -33,6 +33,7 @@ private:
 	bool isXInLeftInQuery(X);
 
 	void removeX(Msg m);	//for the case of msg fail-success and fail-fail expcetional.
+	void appendX(Msg m);
 	
 	
 public:

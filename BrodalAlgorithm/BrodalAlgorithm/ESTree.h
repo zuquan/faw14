@@ -56,5 +56,6 @@ public:
 	int allLeafNum();
 
 	void deleteVariable(int);
+	void appendVariable(int);
 };
 
