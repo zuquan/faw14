@@ -19,7 +19,7 @@ int main()
 {
 	//cout << "hello" << endl;
 	//open a file
-	generator();
+	//generator();
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
 	if (!in)
