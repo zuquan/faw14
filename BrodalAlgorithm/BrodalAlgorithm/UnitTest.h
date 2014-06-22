@@ -26,4 +26,6 @@ public:
 	bool isYMatched(Y);
 	Y mateOfX(X);
 	X mateOfY(Y);
+
+	void verifiyESTree(ESTreeNode* node);
 };

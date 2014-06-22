@@ -1,8 +1,9 @@
 #include<algorithm>
 #include"AdvancedDSTree.h"
-
+#include"UnitTest.h"
 
 extern vector<Y> allExistingY;
+extern UnitTest * ut;
 
 bool cmpY(Y y1, Y y2)
 {
@@ -401,9 +402,14 @@ Msg AdvancedDSTreeNode::insertX(X x)
 		int a = 8;
 	}
 
-	int kOfX = sizeOfY((*pESValues)[0], x._end);
-	int indexJ = _pESTree->insertVariable(kOfX);//indexJ: 1...m+1
-	if (indexJ <= _pESTree->allLeafNum() - 1)//insert fail
+	if (x._id == 197)
+	{
+		int a = 0;
+	}
+
+	int kOfX = sizeOfY((*pESValues)[0], x._end);	// the index of the END[x] in the current ESTree 
+	int indexJ = _pESTree->insertVariable(kOfX);	//indexJ: 1...m+1
+	if (indexJ <= _pESTree->allLeafNum() - 1)		//insert fail
 	{
 		Y endY;
 		X preemptedX;
@@ -448,7 +454,8 @@ Msg AdvancedDSTreeNode::insertX(X x)
 		{
 			if (preemptedX._id == 81)
 			{
-				int a = 0;
+				int a = 0;				
+				ut->verifiyESTree(_pESTree->_root);
 			}
 			_infeasible.push_back(preemptedX);
 		}

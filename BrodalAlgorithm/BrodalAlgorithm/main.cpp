@@ -8,6 +8,7 @@ using namespace std;
 
 vector<Y> allExistingY;	// TBD: use BST to store Y nodes
 vector<X> allExistingX;
+UnitTest * ut = new UnitTest(allExistingX, allExistingY);
 
 void generator();
 
@@ -177,7 +178,7 @@ int main()
 	}
 
 	// unit test
-	UnitTest *ut = new UnitTest(allExistingX, allExistingY);
+	
 	ut->printUnitTest();
 
 	in.close();

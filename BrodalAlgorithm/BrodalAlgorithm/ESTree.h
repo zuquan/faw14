@@ -19,6 +19,7 @@ private:
 	int _leafNum;
 	friend class ESTree;
 	friend class AdvancedDSTreeNode;
+	friend class UnitTest;
 
 public:
 	ESTreeNode(int leafNum);
@@ -41,6 +42,9 @@ private:
 	stack<ESTreeNode*> getPathElements(ESTreeNode*);
 
 	int getIndex(ESTreeNode*); //the index of the first leaf is 1
+
+	friend class UnitTest;
+
 public:
 	ESTree(int rangeOfY);
 	int insertVariable(int k);	//if the return value == m+1,then success, else failure

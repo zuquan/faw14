@@ -4,9 +4,9 @@
 #include<Windows.h>
 #include<time.h>
 
-bool cmpX_ID(X x1, X x2)	
+bool cmpX_ID(X x1, X x2)
 {
-	return x1._id < x2._id;	
+	return x1._id < x2._id;
 }
 
 bool cmpY_UT(Y y1, Y y2)
@@ -38,7 +38,7 @@ void UnitTest::printUnitTest()
 			out << "x:" << _allX[i]._id << " is not matched." << endl;
 		}
 	}
-		
+
 	sort(_allY.begin(), _allY.end(), cmpY_UT);
 	for (int i = 0; i < _allY.size(); i++)
 	{
@@ -182,7 +182,7 @@ void generator()
 	{
 		srand((unsigned)time(NULL) + diff);
 		diff++;
-		int b = rand()% range + 1;
+		int b = rand() % range + 1;
 		int rest = range - b;
 		int e;
 		if (rest == 0)
@@ -226,3 +226,40 @@ void generator()
 
 
 }
+
+
+void UnitTest::verifiyESTree(ESTreeNode* node)
+{
+	ESTreeNode* root = node;
+	while (root->_parent != NULL)
+	{
+		root = root->_parent;
+	}
+
+	ofstream out("debug.txt");
+
+	cout << "debug ESTREE format: (index, add, min, leafNum)" << endl;
+	deque<ESTreeNode*> queue;
+	queue.push_back(root);
+	int count = 1;
+	int level = 0;
+
+	while (queue.empty() == false)
+	{
+		cout << "level " << level++ << ": ";
+		int size = queue.size();
+		for (int i = 0; i < size; i++)
+		{
+			ESTreeNode* tmp = queue.front();
+			queue.pop_front();
+			if (tmp->_leftChild != NULL)
+			{
+				queue.push_back(tmp->_leftChild);
+				queue.push_back(tmp->_rightChild);
+			}
+			out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+		}
+		out << endl;
+	}	
+}
+
