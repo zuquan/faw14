@@ -31,6 +31,8 @@ private:
 	void queryUpdateNodeW();
 	void queryUpdateLeafW();
 	bool isXInLeftInQuery(X);
+
+	void removeX(Msg m);	//for the case of msg fail-success and fail-fail expcetional.
 	
 	
 public:

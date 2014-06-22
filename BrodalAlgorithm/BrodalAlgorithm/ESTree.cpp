@@ -228,8 +228,13 @@ void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 }
 
 // for the x_k, increase the value of b_j from k-1 to m
-void ESTree::deleteTheX(int kOfX)
+void ESTree::deleteVariable(int kOfX)
 {
+	if (kOfX > _root->_leafNum - 1)
+	{
+		kOfX = _root->_leafNum - 1;
+	}
+
 	ESTreeNode* leafK = locateLeafK(kOfX - 1);	// this is the implementation model, so k -> k-1				
 	ESTreeNode* lastLeaf = _root;	
 
@@ -240,26 +245,18 @@ void ESTree::deleteTheX(int kOfX)
 	updateBjFromK2J(leafK, lastLeaf, +1);			// update the value of b_j or _add for the leaf or nodes between k and j, implictly.
 }
 
+// return j, such that a_j=j
 int ESTree::insertVariable(int k)
 {
-	//ESTreeNode* leafKMinusOne = locateLeafK(k - 1);//n_k+1=>b_{k-1}-1 so locate k-1
-	//leafKMinusOne->_add--;
-	//ESTreeNode* tmp = leafKMinusOne;
-	//int tmpSumU2V = 0;
-	//while (tmp != NULL)
-	//{
-	//	if (tmpSumU2V < tmp->_min)
-	//		tmp->_min = tmpSumU2V;
-	//	tmpSumU2V += tmp->_add;
-	//	tmp = tmp->_parent;
-	//}
-
 	if (k > _root->_leafNum - 1)
 	{
 		k = _root->_leafNum - 1;
 	}
 
-	ESTreeNode* leafK = locateLeafK(k - 1);	// this is the implementation model, so k -> k-1			
+	// to get the b_{j-1}, so input k-1; but the ES-Tree start from 0, so get the k^th leaf.
+	ESTreeNode* leafK = locateLeafK(k - 1);	// this is the implementation model, so k -> k-1
+
+	// return the leaf j such that a_j=j, need to transfer to index of values later.
 	ESTreeNode* leafJ = locateLeafJ(leafK);	// compute a_j=j
 	updateBjFromK2J(leafK, leafJ, -1);		// update the value of b_j or _add for the leaf or nodes between k and j, implictly.
 

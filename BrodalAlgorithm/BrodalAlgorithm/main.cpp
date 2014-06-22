@@ -11,7 +11,7 @@ using namespace std;
 
 vector<Y> allExistingY;	// TBD: use BST to store Y nodes
 vector<X> allExistingX;
-UnitTest * ut = new UnitTest(allExistingX, allExistingY);
+UnitTest * ut;
 
 void generator();
 
@@ -74,7 +74,7 @@ int main()
 				  {
 					  allExistingX.push_back(x);	// to be checked
 				  }
-				  if (x._id == 24 || x._id == 60 || x._id == 36 || x._id == 47 )
+				  if (x._id == 92)// || x._id == 60 || x._id == 36 || x._id == 47 )
 				  {
 					  //pTree->unitTestDS("DSTREE");	// unit test
 					  int a = 0;					  
@@ -154,6 +154,9 @@ int main()
 	//pTree->unitTestDS("DSTREE");	// unit test
 	cout << "end" << endl;
 
+	ut = new UnitTest(allExistingX, allExistingY);
+	ut->printUnitTest();
+
 	for (int i = 0; i < allExistingX.size(); i++)
 	{
 		X x = allExistingX[i];
@@ -182,7 +185,7 @@ int main()
 
 	// unit test
 	
-	ut->printUnitTest();
+	
 
 	in.close();
 	return 0;

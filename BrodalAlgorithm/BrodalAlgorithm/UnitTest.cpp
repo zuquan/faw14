@@ -51,6 +51,8 @@ void UnitTest::printUnitTest()
 			out << "y:" << _allY[i]._y << " is not matched." << endl;
 		}
 	}
+
+	out.close();
 }
 
 bool UnitTest::isXMatched(X x)
@@ -104,6 +106,7 @@ X UnitTest::mateOfY(Y y)
 void UnitTest::testGloverMatching(vector<X> inputX, vector<Y>inputY,
 	vector<X>& resultX, vector<Y>& resultY, vector<M>& resultM)
 {
+	
 	for (int i = 0; i < inputY.size(); i++)
 	{
 		vector<X> selectedX;
@@ -125,7 +128,8 @@ void UnitTest::testGloverMatching(vector<X> inputX, vector<Y>inputY,
 			for (int j = 0; j < selectedX.size(); j++)
 			{
 				if (selectedX[j]._end._y < x._end._y ||
-					(selectedX[j]._end._y == x._end._y && selectedX[j]._id < x._id))
+					(selectedX[j]._end._y == x._end._y && selectedX[j]._begin._y < x._begin._y)
+					|| (selectedX[j]._end._y == x._end._y && selectedX[j]._begin._y == x._begin._y && selectedX[j]._id < x._id))
 				{
 					x = selectedX[j];
 				}
@@ -176,12 +180,13 @@ void generator()
 
 	vector<int> begin;
 	vector<int> end;
-	int diff = 0;
+
+	SYSTEMTIME lpsystime;
+	GetLocalTime(&lpsystime);
+	srand(lpsystime.wMilliseconds);
 
 	for (int i = 1; i <= xnum; i++)
 	{
-		srand((unsigned)time(NULL) + diff);
-		diff++;
 		int b = rand() % range + 1;
 		int rest = range - b;
 		int e;
@@ -189,8 +194,6 @@ void generator()
 			e = b;
 		else
 		{
-			srand((unsigned)time(NULL));
-			diff++;
 			int diff = rand() % rest;
 			e = b + diff;
 		}
@@ -236,9 +239,9 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 		root = root->_parent;
 	}
 
-	ofstream out("debug.txt");
+	ofstream out("debug.txt", ios_base::in|ios_base::app);
 
-	cout << "debug ESTREE format: (index, add, min, leafNum)" << endl;
+	// cout << "debug ESTREE format: (index, add, min, leafNum)" << endl;
 	deque<ESTreeNode*> queue;
 	queue.push_back(root);
 	int count = 1;
@@ -257,7 +260,8 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 				queue.push_back(tmp->_leftChild);
 				queue.push_back(tmp->_rightChild);
 			}
-			out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			out << '(' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
 		}
 		out << endl;
 	}	

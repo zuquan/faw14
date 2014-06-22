@@ -55,6 +55,6 @@ public:
 
 	int allLeafNum();
 
-	void deleteTheX(int);
+	void deleteVariable(int);
 };
 
