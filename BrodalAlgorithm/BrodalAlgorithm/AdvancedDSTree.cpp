@@ -286,15 +286,10 @@ bool AdvancedDSTree::insertX(X &x)
 				msg._c = tempMsg._c;
 			}
 		}
-		else // leaf is right child
+		else // the current node is the right child
 		{
-			if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a)//Fail in R
-			{
-				/*msg._aEmpty = false;
-				msg._bEmpty = false;
-				msg._a = tempMsg._a;
-				msg._b = tempMsg._a;
-				msg._c = tempMsg._c;*/
+			if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a)	//Fail in R
+			{	
 				if (msg._c == 1)
 				{
 					leaf->_parent->_transferred.push_back(msg._a);
