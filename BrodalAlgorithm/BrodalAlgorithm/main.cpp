@@ -73,12 +73,7 @@ int main()
 				  else
 				  {
 					  allExistingX.push_back(x);	// to be checked
-				  }
-				  if (x._id == 92)// || x._id == 60 || x._id == 36 || x._id == 47 )
-				  {
-					  //pTree->unitTestDS("DSTREE");	// unit test
-					  int a = 0;					  
-				  }
+				  }				  
 				  pTree->insertX(x);
 		}break;
 

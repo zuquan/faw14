@@ -145,39 +145,31 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 	node->_matched2.clear();
 	node->_transferred.clear();
 	node->_infeasible.clear();
+
+	// for each variables in the previous node, reinsert into the left child
 	for (int i = 0; i < (int)node->_variables.size(); i++)
 	{
 		tmpX = node->_variables[i];
-		msg = leftChild->insertX(tmpX);
+		msg = leftChild->insertX(tmpX);		// insert into the left child
 		switch (msg._c)
 		{
 		case 0:	// matched
 		{
 					node->_matched.push_back(tmpX);
 		}break;
-		case 1:	// transferred
+		case 1:	// transferred, add a into matched, delete b from matched, and add b into ES
 		{
 					node->_matched.push_back(tmpX);
 					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
-					node->_matched.erase(it);
+					node->_matched.erase(it);										
 					node->insertX(msg._b);
-					vector<X>::iterator itA = find(node->_matched2.begin(), node->_matched2.end(), msg._b);
-					if (itA != node->_matched2.end())
-					{
-						int a = 0;
-					}
 		}break;
-		case 2:	// infeasible
+		case 2:	// infeasible, add a into matched, remove b from matched and insert it into infeasible
 		{
 					node->_matched.push_back(tmpX);
 					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
 					node->_matched.erase(it);
 					node->_infeasible.push_back(msg._b);
-					vector<X>::iterator itA = find(node->_matched2.begin(), node->_matched2.end(), msg._b);
-					if (itA != node->_matched2.end())
-					{
-						int a = 0;
-					}
 		}break;
 		}
 	}
@@ -264,57 +256,31 @@ bool AdvancedDSTree::insertX(X &x)
 	return false;
 	}*/
 	AdvancedDSTreeNode* leaf = locateLeafOfX(x);
-	Msg msg = leaf->insertX(x);
+	Msg msg = leaf->insertX(x);		// insert the x into the leaf
 
-	while (leaf->_parent != NULL)//send msg
-	{
-		if (msg._a._id == 84 || msg._a._id == 69)
-		{
-			int a = 0;
-		}
-
-		if (msg._a._id == 39)
-		{
-			int a = 0;
-		}
-
-		if (msg._b._id == 39 && msg._c == 2)
-		{
-			int a = 0;
-		}
-		// from leaf to its parent
-		if (leaf == leaf->_parent->_leftChild)	// leaf is left child
+	while (leaf->_parent != NULL)	//send msg until the root, the msg is from a node to its parent
+	{		
+		// leaf is the current node; the msg comes from its own ES-Tree insert operation
+		if (leaf == leaf->_parent->_leftChild)	// the node is the left child
 		{
 			if (msg._aEmpty == false)
 			{
 				leaf->_parent->_matched.push_back(msg._a);
 			}
 			if (msg._bEmpty == false)
-			{
-				/*if (msg._b._id == 3)
-				{
-				int a=0;
-				}*/
+			{	
+				// questions: is it possible that the b is not in the matched set of the parent?
 				vector<X>::iterator it = find(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), msg._b);
 				leaf->_parent->_matched.erase(it);
-
-				vector<X>::iterator itA = find(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), msg._b);
-				if (itA != leaf->_parent->_matched2.end())
-				{
-					int a = 0;
-				}
 			}
-			if (msg._c == 2)
-			{
-				if (msg._b._id == 81)
-				{
-					int a = 0;
-				}
+
+			if (msg._c == 2)	// infeasible
+			{				
 				leaf->_parent->_infeasible.push_back(msg._b);
 			}
-			else if (msg._c == 1)
+			else if (msg._c == 1)	// transferred
 			{
-				Msg tempMsg = leaf->_parent->insertX(msg._b);
+				Msg tempMsg = leaf->_parent->insertX(msg._b);	// if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
 				msg._b = tempMsg._b;
 				msg._bEmpty = tempMsg._bEmpty;
 				msg._c = tempMsg._c;
@@ -334,11 +300,7 @@ bool AdvancedDSTree::insertX(X &x)
 					leaf->_parent->_transferred.push_back(msg._a);
 				}
 				else
-				{
-					if (msg._a._id == 81)
-					{
-						int a = 0;
-					}
+				{	
 					leaf->_parent->_infeasible.push_back(msg._a);
 				}
 			}
@@ -487,11 +449,7 @@ Msg AdvancedDSTreeNode::insertX(X x)
 		pESValues = &_values;
 	}
 
-	_matched.push_back(x);
-	if (x._id == 39)
-	{
-		int a = 0;
-	}
+	_matched.push_back(x);	
 	_matched2.push_back(x);
 
 	// END[x]=23, kOfX=22 since ES-Tree values'=[2,30]
@@ -540,12 +498,7 @@ Msg AdvancedDSTreeNode::insertX(X x)
 			_transferred.push_back(preemptedX);
 		}
 		else // infeasible
-		{
-			if (preemptedX._id == 81)
-			{
-				int a = 0;
-				ut->verifiyESTree(_pESTree->_root);
-			}
+		{	
 			_infeasible.push_back(preemptedX);
 		}
 
@@ -556,16 +509,6 @@ Msg AdvancedDSTreeNode::insertX(X x)
 		msg._aEmpty = false;
 		msg._bEmpty = true;
 		msg._c = 0;
-	}
-
-	if (this->_values.size() == 23 && this->_values[0]._y == 8 && this->_values[22]._y == 30)
-	{
-		int a = 0;
-		fout << "after test: msg is: " << msg._a << " $ " << msg._b << " $ " << msg._c << " $ " << endl;
-		if (x._id == 19)
-		{
-			ut->verifiyESTree(_pESTree->_root);
-		}
 	}
 
 	return msg;
