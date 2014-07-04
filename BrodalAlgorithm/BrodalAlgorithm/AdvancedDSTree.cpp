@@ -6,6 +6,7 @@
 extern vector<Y> allExistingY;
 extern UnitTest * ut;
 
+// order y according to its index
 bool cmpY(Y y1, Y y2)
 {
 	return y1._y < y2._y;
@@ -75,10 +76,9 @@ ostream& operator<<(ostream& os, const X& rhs)
 
 AdvancedDSTreeNode::AdvancedDSTreeNode(vector<Y> allY)
 {
-	//cout << "create estree " << rangeOfY << endl;
-	_pESTree = new ESTree(allY.size());
-	sort(allY.begin(), allY.end(), cmpY);
-	for (int i = 0; i < (int)allY.size(); i++)
+	_pESTree = new ESTree(allY.size());		// create ds-tree
+	sort(allY.begin(), allY.end(), cmpY);	// to guarantee that the values is in order
+	for (int i = 0; i < (int)allY.size(); i++)	// set _valuse
 	{
 		_values.push_back(allY[i]);
 	}
@@ -92,7 +92,7 @@ AdvancedDSTree::AdvancedDSTree()
 	_root = new AdvancedDSTreeNode(allExistingY);
 }
 
-
+// return the smallest value of this DS-Node
 Y AdvancedDSTreeNode::getIntervalStart()
 {
 	return _values[0];
@@ -102,6 +102,10 @@ AdvancedDSTreeNode* AdvancedDSTree::locateLeafOfX(X x)
 {
 	// assert: x's begin and end have been adjusted to existing value;
 	AdvancedDSTreeNode* node = _root;
+
+	// find the node which the start of y is equal to x.begin
+	// if there is no such node, i.e., reach a leaf which its start is not equal to the x.begin,
+	// then split the leaf into two leaf.
 	while (x._begin._y != node->getIntervalStart()._y)
 	{
 		if (node->_rightChild != NULL)
@@ -179,6 +183,8 @@ void AdvancedDSTree::splitDSNode(AdvancedDSTreeNode* node, X x)
 {
 	vector<Y> leftVecY, rightVecY;
 	int i = 0;
+
+	// split the values into two, one to left leaf, the other to right leaf
 	while (node->_values[i]._y < x._begin._y)
 	{
 		leftVecY.push_back(node->_values[i]);
@@ -193,9 +199,10 @@ void AdvancedDSTree::splitDSNode(AdvancedDSTreeNode* node, X x)
 	AdvancedDSTreeNode* leftChild = new AdvancedDSTreeNode(leftVecY);
 	AdvancedDSTreeNode* rightChild = new AdvancedDSTreeNode(rightVecY);
 
-	node->deleteCurrentESTree();
-	node->_pESTree = new ESTree(rightVecY.size());
+	node->deleteCurrentESTree();	// delete the ES Tree of the current DS Node
+	node->_pESTree = new ESTree(rightVecY.size());	// since the _values of the node is equal to the one of the right child
 
+	// build the structure of the triple first, then insert the new variable
 	leftChild->_variables = node->_variables;	// copy the variables from the parent
 
 	node->_leftChild = leftChild;
@@ -213,6 +220,9 @@ bool AdvancedDSTree::adjustXToProper(X& x)
 	int i = 0;
 	double tempBegin;
 	sort(allExistingY.begin(), allExistingY.end(), cmpY);
+
+	// find the proper begin of x, which is the minimum y which is greater than x.begin. 
+	// e.g.: ajust from 1.5 to 2
 	while (x._begin._y > allExistingY[i]._y)
 	{
 
@@ -224,13 +234,14 @@ bool AdvancedDSTree::adjustXToProper(X& x)
 	}
 	tempBegin = allExistingY[i]._y;
 
+	// assume the end of x must greater than the smallest y
 	if (x._end._y < allExistingY[0]._y)
 	{
 		return false;
 	}
 
 	i = allExistingY.size() - 1;
-	while (x._end._y < allExistingY[i]._y)
+	while (x._end._y < allExistingY[i]._y)	// dual of x.begin
 	{
 		i--;
 	}
@@ -255,7 +266,7 @@ bool AdvancedDSTree::insertX(X &x)
 	cout << x._id << " insert fail" << endl;
 	return false;
 	}*/
-	AdvancedDSTreeNode* leaf = locateLeafOfX(x);
+	AdvancedDSTreeNode* leaf = locateLeafOfX(x);	// locate the leaf corresponding to x.begin
 	Msg msg = leaf->insertX(x);		// insert the x into the leaf
 
 	while (leaf->_parent != NULL)	//send msg until the root, the msg is from a node to its parent
