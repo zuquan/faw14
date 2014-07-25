@@ -58,9 +58,6 @@ bool cmpX3(X x1, X x2)
 }
 
 
-//1=>id da de zai qian
-//2=>id xiao de zai qian
-
 ostream& operator<<(ostream& os, const Y& rhs)
 {
 	os << rhs._y;
@@ -69,7 +66,7 @@ ostream& operator<<(ostream& os, const Y& rhs)
 
 ostream& operator<<(ostream& os, const X& rhs)
 {
-	os << "X: " << rhs._id << " " << rhs._begin << " " << rhs._end;
+	os << "X: " << rhs._id << " " << rhs._begin << " " << rhs._end << " " << rhs._w;
 	return os;
 }
 

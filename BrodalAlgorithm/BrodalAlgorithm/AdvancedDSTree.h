@@ -15,6 +15,7 @@ private:
 	vector<X> _matched2;//matched'
 	vector<X> lp;//W
 	vector<X> update;
+	vector<X> _transFromLMatch;	// intersection of L.transferred and matched2
 		//vector<X> _variables2;//variables'
 		//vector<X> _transferred2;//transferred'
 	
@@ -35,6 +36,10 @@ private:
 	void removeX(Msg m);	//for the case of msg fail-success and fail-fail expcetional.
 	void appendX(Msg m);
 	
+	void replaceMinX();		// find the min replaceable x and repalce it.
+	bool findExtensionX();	// whether there is a extension x from transferred L
+
+
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
@@ -42,6 +47,7 @@ public:
 	void initESTree();
 	Y getIntervalStart();
 	friend class AdvancedDSTree;
+	friend class UnitTest;
 	Msg insertX(X x);
 };
 
@@ -68,5 +74,7 @@ public:
 
 	void verifiyDSTree(AdvancedDSTreeNode* root);
 	void unitTestDS(string str);
+
+	friend class UnitTest;
 
 };

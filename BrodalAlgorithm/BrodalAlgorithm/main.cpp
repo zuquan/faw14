@@ -6,9 +6,6 @@
 
 using namespace std;
 
-//=====test========
-//======test2========
-
 vector<Y> allExistingY;	// TBD: use BST to store Y nodes
 vector<X> allExistingX;
 UnitTest * ut;
@@ -17,9 +14,8 @@ void generator();
 
 int main()
 {
-	//cout << "hello" << endl;
 	//open a file
-	generator();
+	//generator();
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
 	if (!in)
@@ -38,7 +34,6 @@ int main()
 		in >> temp._y;
 		allExistingY.push_back(temp);
 	}
-
 
 
 	AdvancedDSTree* pTree = new AdvancedDSTree();
@@ -64,7 +59,7 @@ int main()
 		case '1':
 		{
 				  X x;
-				  in >> x._id >> x._begin._y >> x._end._y;
+				  in >> x._id >> x._begin._y >> x._end._y >> x._w;
 				  if (pTree->adjustXToProper(x) == false)
 				  {
 					  cout << x._id << " insert fail" << endl;					  
@@ -179,6 +174,7 @@ int main()
 	}
 
 	// unit test
+	ut->testLocatIndexL(pTree);
 	
 	
 

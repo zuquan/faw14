@@ -180,6 +180,7 @@ void generator()
 
 	vector<int> begin;
 	vector<int> end;
+	vector<int> weight;
 
 	SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
@@ -199,6 +200,8 @@ void generator()
 		}
 		begin.push_back(b);
 		end.push_back(e);
+		int w = rand() % 100 + 1;
+		weight.push_back(w);
 	}
 
 
@@ -209,17 +212,18 @@ void generator()
 		of << i << " ";
 		of << begin[i - 1] << " ";
 		of << end[i - 1] << " ";
+		of << weight[i - 1] << " ";
 	}
-	for (int i = 1; i <= xnum; i++)
+	/*for (int i = 1; i <= xnum; i++)
 	{
 		of << endl;
 		of << 6 << " " << i << " " << begin[i - 1] << " " << end[i - 1];
-	}
-	for (int i = 1; i <= range; i++)
+	}*/
+	/*for (int i = 1; i <= range; i++)
 	{
 		of << endl;
 		of << 8 << " " << i;
-	}
+	}*/
 	of << endl;
 	of << '$' << endl;
 
@@ -267,3 +271,32 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 	}	
 }
 
+void UnitTest::testLocatIndexL(AdvancedDSTree * tree)
+{
+	X x;
+	Y y;
+	y._y = 1;
+	x._begin = y;
+	y._y = 3;
+	x._end = y;
+
+	AdvancedDSTreeNode *node = tree->_root;
+
+	vector<Y>* pESValues;
+	if (node->_rightChild != NULL)
+	{
+		pESValues = &node->_rightChild->_values;
+	}
+	else
+	{
+		pESValues = &node->_values;
+	}
+
+	int kOfX = node->sizeOfY((*pESValues)[0], x._end);
+
+	ESTreeNode* leafK = node->_pESTree->locateLeafK(3);	// this is the implementation model, so k -> k-1
+	ESTreeNode* leafJ = node->_pESTree->locateLeafL(leafK);	// compute a_j=j
+
+	//verifiyESTree(node->_pESTree->_root);
+	int a = 0;
+}

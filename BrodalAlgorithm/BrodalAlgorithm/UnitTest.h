@@ -28,4 +28,7 @@ public:
 	X mateOfY(Y);
 
 	void verifiyESTree(ESTreeNode* node);
+
+	void testLocatIndexL(AdvancedDSTree *);
+
 };
