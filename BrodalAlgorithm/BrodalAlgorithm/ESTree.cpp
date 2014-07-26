@@ -367,8 +367,21 @@ int ESTree::insertVariable(int k)
 
 	/*int a = getIndex(leafJ);
 	int b = getIndex(leafK);*/
-	unitTest("ESTREE");	// for test	
+	//unitTest("ESTREE");	// for test	
 
+	int j = getIndex(leafJ);
+	return j;
+}
+
+
+int ESTree::getLbyK(int k)
+{
+	if (k > _root->_leafNum - 1)
+	{
+		k = _root->_leafNum - 1;
+	}
+	ESTreeNode* leafK = locateLeafK(k - 1);
+	ESTreeNode* leafJ = locateLeafJ(leafK);
 	int j = getIndex(leafJ);
 	return j;
 }

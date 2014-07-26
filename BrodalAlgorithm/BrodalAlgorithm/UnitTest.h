@@ -31,4 +31,6 @@ public:
 
 	void testLocatIndexL(AdvancedDSTree *);
 
+	void testEETree(AdvancedDSTree * tree);
+
 };

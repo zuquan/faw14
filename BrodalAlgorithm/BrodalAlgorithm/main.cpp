@@ -143,9 +143,14 @@ int main()
 	
 	//pTree->unitTestDS("DSTREE");	// unit test
 	cout << "end" << endl;
+	
+	
+
 
 	ut = new UnitTest(allExistingX, allExistingY);
 	ut->printUnitTest();
+
+	//ut->testEETree(pTree);
 
 	for (int i = 0; i < allExistingX.size(); i++)
 	{

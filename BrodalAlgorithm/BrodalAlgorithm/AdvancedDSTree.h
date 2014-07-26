@@ -21,6 +21,7 @@ private:
 	
 
 	ESTree* _pESTree;
+	ESTree* _pEETree;
 
 	AdvancedDSTreeNode* _parent;
 	AdvancedDSTreeNode* _leftChild;
@@ -38,7 +39,7 @@ private:
 	
 	void replaceMinX();		// find the min replaceable x and repalce it.
 	bool findExtensionX();	// whether there is a extension x from transferred L
-
+	
 
 	
 public:
@@ -53,6 +54,7 @@ public:
 
 class AdvancedDSTree
 {
+//public:
 private:
 	AdvancedDSTreeNode* _root;
 	AdvancedDSTreeNode* locateLeafOfX(X x);	

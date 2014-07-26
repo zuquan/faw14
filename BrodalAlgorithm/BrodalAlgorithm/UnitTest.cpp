@@ -300,3 +300,10 @@ void UnitTest::testLocatIndexL(AdvancedDSTree * tree)
 	//verifiyESTree(node->_pESTree->_root);
 	int a = 0;
 }
+
+
+void UnitTest::testEETree(AdvancedDSTree * tree)
+{
+	int b = tree->_root->_pEETree->getLbyK(1);
+	int a = 0;
+}

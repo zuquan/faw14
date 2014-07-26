@@ -74,6 +74,7 @@ AdvancedDSTreeNode::AdvancedDSTreeNode(vector<Y> allY)
 {
 	//cout << "create estree " << rangeOfY << endl;
 	_pESTree = new ESTree(allY.size());
+	_pEETree = new ESTree(allY.size());
 	sort(allY.begin(), allY.end(), cmpY);
 	for (int i = 0; i < (int)allY.size(); i++)
 	{
@@ -192,6 +193,7 @@ void AdvancedDSTree::splitDSNode(AdvancedDSTreeNode* node, X x)
 
 	node->deleteCurrentESTree();
 	node->_pESTree = new ESTree(rightVecY.size());
+	node->_pEETree = new ESTree(rightVecY.size());
 
 	leftChild->_variables = node->_variables;	// copy the variables from the parent
 
@@ -341,6 +343,7 @@ bool AdvancedDSTree::insertX(X &x)
 void AdvancedDSTreeNode::removeX(Msg m)
 {
 	_pESTree->deleteVariable(sizeOfY(_rightChild->_values[0], m._b._end));
+	_pEETree->deleteVariable(_pEETree->allLeafNum()-sizeOfY(_rightChild->_values[0], m._b._begin));
 
 	if (m._c == 1)
 	{
@@ -371,6 +374,7 @@ void AdvancedDSTreeNode::appendX(Msg m)
 		_infeasible.erase(it);	// delete b in the matched set of parent
 	}
 	_pESTree->appendVariable(sizeOfY(_rightChild->_values[0], m._b._end));
+	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(_rightChild->_values[0], m._b._begin));
 	_matched.push_back(m._b);
 	_matched2.push_back(m._b);
 }
@@ -381,8 +385,15 @@ void AdvancedDSTreeNode::appendX(Msg m)
 int AdvancedDSTreeNode::sizeOfY(Y start, Y end)
 {
 	// assertion: start<=end && end<=max(Y)
+	if (end < start)//in EETree
+	{
+		end = start;
+	}
 	if (start > end || end > allExistingY[allExistingY.size() - 1])
+	{
 		return 0;
+	}
+		
 	int i = 0;
 	int size = 0;
 	while (i < (int)allExistingY.size() && end >= allExistingY[i])
@@ -411,6 +422,7 @@ void AdvancedDSTreeNode::deleteCurrentESTree(ESTreeNode* currentNode)
 void AdvancedDSTreeNode::deleteCurrentESTree()
 {
 	deleteCurrentESTree(this->_pESTree->_root);
+	deleteCurrentESTree(this->_pEETree->_root);
 }
 
 
@@ -501,6 +513,18 @@ Msg AdvancedDSTreeNode::insertX(X x)
 		msg._aEmpty = false;
 		msg._bEmpty = true;
 		msg._c = 0;
+	}
+
+	//modify EETree
+	if (msg._aEmpty == false)
+	{
+		_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], msg._a._begin));
+	}
+
+
+	if (msg._bEmpty == false)
+	{
+		_pEETree->deleteVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], msg._b._begin));
 	}
 
 	return msg;
