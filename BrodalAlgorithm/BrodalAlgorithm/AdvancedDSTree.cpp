@@ -1,7 +1,7 @@
 #include<algorithm>
+#include<fstream>
 #include"AdvancedDSTree.h"
 #include"UnitTest.h"
-#include<fstream>
 
 extern vector<Y> allExistingY;
 extern UnitTest * ut;
@@ -76,6 +76,42 @@ bool cmpXBegDec(X x1, X x2)
 		return x1._begin > x2._begin;
 	}
 }
+
+
+// priority: weight-id order , increasing order
+bool cmpXWeight(X x1, X x2)
+{
+	if (x1._w < x2._w)
+	{
+		return true;
+	}
+	else
+	{
+		if (x1._w == x2._w && x1._id < x2._id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+// priority: begin order , increasing order
+bool cmpXBegin(X x1, X x2)
+{
+	if (x1._begin < x2._begin)
+	{
+		return true;
+	}
+	else
+	{
+		if (x1._begin == x2._begin && x1._id < x2._id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 
 
 ostream& operator<<(ostream& os, const Y& rhs)
@@ -856,6 +892,7 @@ void AdvancedDSTree::unitTestDS(string str)
 	}
 }
 
+
 vector<X> AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x)
 {
 	vector<X> replaceableSetOfP;
@@ -885,7 +922,7 @@ vector<X> AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X 
 	}
 
 	int kOfX = node->sizeOfY((*pEEValues)[0], x._begin);
-	int l = node->_pEETree->getLbyK(node->_pEETree->allLeafNum - kOfX);	// m+1-k'
+	int l = node->_pEETree->getLbyK(node->_pEETree->allLeafNum() - kOfX);	// m+1-k'
 	sort(node->_matched.begin(), node->_matched.end(), cmpXBegDec);
 	for (int i = 0; i < l; i++)
 	{
@@ -893,4 +930,60 @@ vector<X> AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X 
 	}
 
 	return replaceableSetOfLeftChild;
+}
+
+X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode)
+{
+	AdvancedDSTreeNode* curNode = infeasibleNode;
+	X curMinWeightX;
+	vector<X> curRInNode;
+	// get curRInNode;
+	sort(curRInNode.begin(), curRInNode.end(), cmpXWeight);
+	curMinWeightX = curRInNode[0];
+	sort(curRInNode.begin(), curRInNode.end(), cmpXBegin);
+	if (curRInNode[0]._begin < infeasibleNode->_values[0])// there is at least a transferred X matchs 1-j
+	{
+		while (true)
+		{
+			curNode = curNode->_leftChild;
+			//get curRInNode in the left child, provide the transferred X with min begin: curRInNode[0](parent's), curNode
+			sort(curRInNode.begin(), curRInNode.end(), cmpXWeight);
+			if (cmpXWeight(curRInNode[0], curMinWeightX) == true)
+			{
+				curMinWeightX = curRInNode[0];
+			}
+			if (continueCalToLeft(curNode, curRInNode) == true)
+			{
+				continue;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+
+	return curMinWeightX;
+}
+
+bool AdvancedDSTree::continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& replaceableX)
+{
+	if (curNode->_leftChild == NULL)
+	{
+		return false;
+	}
+	else
+	{
+		sort(replaceableX.begin(), replaceableX.end(), cmpXBegin);
+		if (replaceableX[0]._begin < curNode->_values[0])
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 }

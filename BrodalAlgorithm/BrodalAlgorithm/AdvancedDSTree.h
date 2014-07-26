@@ -66,6 +66,8 @@ private:
 
 	vector<X> replaceableSetOfP(AdvancedDSTreeNode*, X);
 	vector<X> repalceableSetOfLeftChild(AdvancedDSTreeNode*, X);
+	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode);
+	bool continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& replaceableX);
 	
 public:
 	AdvancedDSTree();
@@ -81,5 +83,7 @@ public:
 	void unitTestDS(string str);
 
 	friend class UnitTest;
+
+
 
 };
