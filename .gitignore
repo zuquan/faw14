@@ -213,3 +213,22 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+BrodalAlgorithm/BrodalAlgorithm.sln
+*.vcxproj
+*.filters
+BrodalAlgorithm/BrodalAlgorithm/case/BK/input_bk_0621.txt
+BrodalAlgorithm/BrodalAlgorithm/case/BK/input_bk_0621_1.txt
+BrodalAlgorithm/BrodalAlgorithm/case/BK/input_bk_0621_2.txt
+BrodalAlgorithm/BrodalAlgorithm/case/BK/input_bk_0621_3.txt
+BrodalAlgorithm/BrodalAlgorithm/case/BK/input_bk_1.txt
+BrodalAlgorithm/BrodalAlgorithm/case/input.xlsx
+BrodalAlgorithm/BrodalAlgorithm/case/input_30_200.txt
+BrodalAlgorithm/BrodalAlgorithm/case/input_bk_200cases.txt
+BrodalAlgorithm/BrodalAlgorithm/case/input_bk_50_50.txt
+BrodalAlgorithm/BrodalAlgorithm/debug.txt
+BrodalAlgorithm/BrodalAlgorithm/outputMain.txt
+BrodalAlgorithm/BrodalAlgorithm/outputUT.txt
+BrodalAlgorithm/BrodalAlgorithm/input.txt
+BrodalAlgorithm/BrodalAlgorithm/input.txt
+BrodalAlgorithm/BrodalAlgorithm/input.txt
+BrodalAlgorithm/BrodalAlgorithm/input.txt
