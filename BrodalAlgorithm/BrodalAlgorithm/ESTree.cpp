@@ -373,7 +373,7 @@ int ESTree::insertVariable(int k)
 	return j;
 }
 
-
+// k is the index of leaf, which is the result of m+1-k' where k' is the sequence of the BEG[x]
 int ESTree::getLbyK(int k)
 {
 	if (k > _root->_leafNum - 1)

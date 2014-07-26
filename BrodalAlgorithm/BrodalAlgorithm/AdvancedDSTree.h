@@ -63,6 +63,9 @@ private:
 	void updateAuxSet4Split(AdvancedDSTreeNode*);
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
 	X gloverMatchingInLeafForAnY(AdvancedDSTreeNode*, Y);
+
+	vector<X> replaceableSetOfP(AdvancedDSTreeNode*, X);
+	vector<X> repalceableSetOfLeftChild(AdvancedDSTreeNode*, X);
 	
 public:
 	AdvancedDSTree();

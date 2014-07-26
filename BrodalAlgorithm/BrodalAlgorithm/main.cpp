@@ -150,7 +150,7 @@ int main()
 	ut = new UnitTest(allExistingX, allExistingY);
 	ut->printUnitTest();
 
-	//ut->testEETree(pTree);
+	ut->testEETree(pTree);
 
 	for (int i = 0; i < allExistingX.size(); i++)
 	{
