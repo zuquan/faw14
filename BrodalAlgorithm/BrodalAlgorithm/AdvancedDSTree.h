@@ -63,6 +63,9 @@ private:
 	void updateAuxSet4Split(AdvancedDSTreeNode*);
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
 	X gloverMatchingInLeafForAnY(AdvancedDSTreeNode*, Y);
+
+	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode);
+	bool continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& replaceableX);
 	
 public:
 	AdvancedDSTree();
@@ -78,5 +81,7 @@ public:
 	void unitTestDS(string str);
 
 	friend class UnitTest;
+
+
 
 };
