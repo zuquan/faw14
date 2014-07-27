@@ -312,6 +312,12 @@ bool AdvancedDSTree::insertX(X &x)
 	}*/
 	AdvancedDSTreeNode* leaf = locateLeafOfX(x);
 	Msg msg = leaf->insertX(x);		// insert the x into the leaf
+	if (msg._c == 2)
+	{
+		msg._b = replaceMinWeightX(leaf, msg);
+		int a = 0;
+
+	}
 
 	while (leaf->_parent != NULL)	//send msg until the root, the msg is from a node to its parent
 	{
@@ -341,14 +347,17 @@ bool AdvancedDSTree::insertX(X &x)
 				msg._c = tempMsg._c;
 				if (tempMsg._c == 2)
 				{
-					//delete a from ESTree && EETree , add b back into ESEETree
-					if (!(tempMsg._a == tempMsg._b))
-					{
-						leaf->_parent->removeXinWeightProcess(tempMsg._a);	// tempMsg._a is the original msg._b
-						leaf->_parent->appendXinWeightProcess(tempMsg._b);
-					}					
-					X tempx = determineMinWeightX(leaf->_parent, tempMsg._a, tempMsg._b);
+					msg._b = replaceMinWeightX(leaf->_parent, tempMsg);
 					int a = 0;
+
+					////delete a from ESTree && EETree , add b back into ESEETree
+					//if (!(tempMsg._a == tempMsg._b))
+					//{
+					//	leaf->_parent->removeXinWeightProcess(tempMsg._a);	// tempMsg._a is the original msg._b
+					//	leaf->_parent->appendXinWeightProcess(tempMsg._b);
+					//}					
+					//X tempx = determineMinWeightX(leaf->_parent, tempMsg._a, tempMsg._b);
+					//int a = 0;
 				}
 			}
 		}
@@ -391,14 +400,15 @@ bool AdvancedDSTree::insertX(X &x)
 
 					if (tempMsg._c == 2)
 					{
-						//delete a from ESTree && EETree , add b back into ESEETree
-						if (!(tempMsg._a == tempMsg._b))
-						{
-							leaf->_parent->removeXinWeightProcess(tempMsg._a);
-							leaf->_parent->appendXinWeightProcess(tempMsg._b);
-						}
-						X tempx = determineMinWeightX(leaf->_parent, tempMsg._a, tempMsg._b);
-						int a = 0;
+						msg._b = replaceMinWeightX(leaf->_parent, tempMsg);
+						////delete a from ESTree && EETree , add b back into ESEETree
+						//if (!(tempMsg._a == tempMsg._b))
+						//{
+						//	leaf->_parent->removeXinWeightProcess(tempMsg._a);
+						//	leaf->_parent->appendXinWeightProcess(tempMsg._b);
+						//}
+						//X tempx = determineMinWeightX(leaf->_parent, tempMsg._a, tempMsg._b);
+						//int a = 0;
 
 					}
 				}
@@ -995,8 +1005,9 @@ void AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X x, ve
 	rset.push_back(x);	// add the inserted x iteself
 }
 
-X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X newX, X jX, AdvancedDSTreeNode* stopNode)
+X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X newX, X jX, AdvancedDSTreeNode* &stopNode)
 {
+	stopNode = infeasibleNode;
 	AdvancedDSTreeNode* curNode = infeasibleNode;
 	X curMinWeightX;
 	vector<X> curRInNode;
@@ -1070,7 +1081,7 @@ vector<Y> AdvancedDSTreeNode::getESValues()
 }
 
 // msg._a is the x vertex added into the node P
-void AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
+X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 {
 	//delete a from ESTree && EETree , add b back into ESEETree
 	if (!(msg._a == msg._b))
@@ -1098,21 +1109,88 @@ void AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		// modify the current mediate nodes, including the stopNode
 		while (stopNode != nodeP)
 		{
-			// call the function for mediate nodes
+			stopNode = stopNode->pullBackATransferredXInWeightProcess(nodeP, minX);
 		}
 
 		// add the (4, 12) back to P
 		if (!(minX == msg._a))
 		{
+			vector<X>::iterator tmpIt = find(nodeP->_matched.begin(), nodeP->_matched.end(), minX);
+			nodeP->_matched.erase(tmpIt);
 			nodeP->appendXinWeightProcess(msg._a);
 		}
 	}
+	return minX;
+}
 
+
+AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX)
+{
+	//return value
+	AdvancedDSTreeNode* anc;
+	//for the first time, remember removeX minx from ESTreeEETree
+	vector<X>::iterator minx = find(_matched.begin(), _matched.end(), minWeightX);
+	if (minx != _matched.end())
+	{
+		_matched.erase(minx);
+	}
+	_infeasible.push_back(minWeightX);
+
+	//select
+	vector<X> tm;
+
+	for (unsigned int i = 0; i < _transferred.size(); i++)
+	{
+		X curX = _transferred[i];
+		if (find(infeasibleNode->_matched.begin(), infeasibleNode->_matched.end(), curX) != infeasibleNode->_matched.end())
+			//|| find(_parent->_transferred.begin(), _parent->_transferred.end(), curX) != _parent->_transferred.end())
+			//if (find(_parent->_infeasible.begin(), _parent->_infeasible.end(), curX) == _parent->_infeasible.end())
+		{
+			//finally matched
+			tm.push_back(curX);
+		}
+	}
+
+	sort(tm.begin(), tm.end(), cmpX3);
+	X backX = tm[0];
+
+	//add backX into current Node
+	vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), backX);
+	_transferred.erase(it);
+
+	_pESTree->appendVariable(sizeOfY(getESValues()[0],backX._end));
+	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(getESValues()[0], backX._begin));
+	_matched.push_back(backX);
+	_matched2.push_back(backX);
 	
-
-
-
-
-
-
+	//deal with the jumped DSNodes
+	AdvancedDSTreeNode* curNode = this;
+	while (true)
+	{
+		curNode = curNode->_parent;
+		vector<X>::iterator it = find(curNode->_transferred.begin(), curNode->_transferred.end(), backX);
+		if (it != curNode->_transferred.end())
+		{
+			//backX in transferred
+			//pull back, no influence to ES or EE
+			curNode->_transferred.erase(it);
+			curNode->_matched.push_back(backX);
+			//erase minWeightX
+			vector<X>::iterator it2 = find(curNode->_matched.begin(), curNode->_matched.end(), minWeightX);
+			curNode->_matched.erase(it2);
+			curNode->_infeasible.push_back(minWeightX);
+		}
+		else
+		{
+			//not in transferred, must in matched2
+			//delete backX from matched2, keep in matched
+			vector<X>::iterator it2 = find(curNode->_matched2.begin(), curNode->_matched2.end(), backX);
+			curNode->_matched2.erase(it2);
+			curNode->_pESTree->deleteVariable(sizeOfY(curNode->getESValues()[0], backX._end));
+			curNode->_pEETree->deleteVariable(curNode->_pEETree->allLeafNum() - sizeOfY(curNode->getESValues()[0], backX._begin));
+			anc = curNode;
+			break;
+		}
+	}
+	return anc;
 }

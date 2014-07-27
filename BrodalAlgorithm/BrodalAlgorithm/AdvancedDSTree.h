@@ -44,6 +44,8 @@ private:
 	bool findExtensionX();	// whether there is a extension x from transferred L
 	
 	vector<Y> getESValues();
+
+	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX);
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
