@@ -45,7 +45,7 @@ private:
 	
 	vector<Y> getESValues();
 
-	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX);
+	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, X insertedX);
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);

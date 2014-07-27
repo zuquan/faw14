@@ -454,7 +454,7 @@ void AdvancedDSTreeNode::removeX(Msg m)
 	_matched2.erase(it1);	// delete b in the matched2 set of parent
 }
 
-// call by parent in Weight Matching case;
+// call by parent in Weight Matching case ::: Undo infeasible insertion
 void AdvancedDSTreeNode::removeXinWeightProcess(X x)
 {
 	vector<Y>* pESValues;
@@ -1109,7 +1109,7 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		// modify the current mediate nodes, including the stopNode
 		while (stopNode != nodeP)
 		{
-			stopNode = stopNode->pullBackATransferredXInWeightProcess(nodeP, minX);
+			stopNode = stopNode->pullBackATransferredXInWeightProcess(nodeP, minX, msg._a);
 		}
 
 		// add the (4, 12) back to P
@@ -1117,14 +1117,18 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		{
 			vector<X>::iterator tmpIt = find(nodeP->_matched.begin(), nodeP->_matched.end(), minX);
 			nodeP->_matched.erase(tmpIt);
-			nodeP->appendXinWeightProcess(msg._a);
+			//nodeP->appendXinWeightProcess(msg._a);
+			nodeP->_pESTree->appendVariable(nodeP->sizeOfY(nodeP->getESValues()[0], msg._a._end));
+			nodeP->_pEETree->appendVariable(nodeP->sizeOfY(nodeP->getESValues()[0], msg._a._begin));
+			nodeP->_matched.push_back(msg._a);
+			nodeP->_matched2.push_back(msg._a);
 		}
 	}
 	return minX;
 }
 
 
-AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX)
+AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, X insertedX)
 {
 	//return value
 	AdvancedDSTreeNode* anc;
@@ -1150,9 +1154,17 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 			tm.push_back(curX);
 		}
 	}
-
-	sort(tm.begin(), tm.end(), cmpX3);
-	X backX = tm[0];
+	X backX;
+	if (tm.size() == 0)
+	{
+		backX = insertedX;
+	}
+	else
+	{
+		sort(tm.begin(), tm.end(), cmpX3);
+		backX = tm[0];
+	}
+	
 
 	//add backX into current Node
 	vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), backX);
@@ -1182,12 +1194,22 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 		}
 		else
 		{
-			//not in transferred, must in matched2
+			//not in transferred, //must in matched2
 			//delete backX from matched2, keep in matched
-			vector<X>::iterator it2 = find(curNode->_matched2.begin(), curNode->_matched2.end(), backX);
-			curNode->_matched2.erase(it2);
-			curNode->_pESTree->deleteVariable(sizeOfY(curNode->getESValues()[0], backX._end));
-			curNode->_pEETree->deleteVariable(curNode->_pEETree->allLeafNum() - sizeOfY(curNode->getESValues()[0], backX._begin));
+
+			//backX may be the inserted x, which is not in the matched set
+			if (!(backX == insertedX))
+			{
+				vector<X>::iterator it2 = find(curNode->_matched2.begin(), curNode->_matched2.end(), backX);
+				curNode->_matched2.erase(it2);
+				curNode->_pESTree->deleteVariable(sizeOfY(curNode->getESValues()[0], backX._end));
+				curNode->_pEETree->deleteVariable(curNode->_pEETree->allLeafNum() - sizeOfY(curNode->getESValues()[0], backX._begin));
+			}
+			else
+			{
+
+			}
+			
 			anc = curNode;
 			break;
 		}
