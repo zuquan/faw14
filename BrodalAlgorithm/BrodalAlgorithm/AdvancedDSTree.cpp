@@ -460,9 +460,15 @@ void AdvancedDSTreeNode::removeXinWeightProcess(X x)
 	_pEETree->deleteVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], x._begin));
 
 	vector<X>::iterator it = find(_matched.begin(), _matched.end(), x);
-	_matched.erase(it);	// delete b in the matched set of parent
+	if (it != _matched.end())
+	{
+		_matched.erase(it);	// delete b in the matched set of parent
+	}	
 	vector<X>::iterator it1 = find(_matched2.begin(), _matched2.end(), x);
-	_matched2.erase(it1);	// delete b in the matched2 set of parent
+	if (it1 != _matched2.end())
+	{
+		_matched2.erase(it1);	// delete b in the matched2 set of parent
+	}	
 }
 
 void AdvancedDSTreeNode::appendX(Msg m)
@@ -989,7 +995,7 @@ void AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X x, ve
 	rset.push_back(x);	// add the inserted x iteself
 }
 
-X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X newX, X jX)
+X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X newX, X jX, AdvancedDSTreeNode* stopNode)
 {
 	AdvancedDSTreeNode* curNode = infeasibleNode;
 	X curMinWeightX;
@@ -1012,6 +1018,7 @@ X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X newX
 			if (cmpXWeight(curRInNode[0], curMinWeightX) == true)
 			{
 				curMinWeightX = curRInNode[0];
+				stopNode = curNode;
 			}
 			if (continueCalToLeft(curNode, curRInNode) == true)
 			{
@@ -1060,4 +1067,52 @@ vector<Y> AdvancedDSTreeNode::getESValues()
 	{
 		return _values;
 	}
+}
+
+// msg._a is the x vertex added into the node P
+void AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
+{
+	//delete a from ESTree && EETree , add b back into ESEETree
+	if (!(msg._a == msg._b))
+	{
+		nodeP->removeXinWeightProcess(msg._a);	// tempMsg._a is the original msg._b
+		nodeP->appendXinWeightProcess(msg._b);
+	}
+
+	AdvancedDSTreeNode * stopNode = NULL;
+	X minX = determineMinWeightX(nodeP, msg._a, msg._b, stopNode);
+
+	if (stopNode == nodeP)
+	{
+		if (!(minX == msg._a))
+		{
+			nodeP->removeXinWeightProcess(minX);
+			nodeP->appendXinWeightProcess(msg._a);
+		}
+	}
+	else
+	{
+		// modify the stopNode
+		stopNode->removeXinWeightProcess(minX);
+
+		// modify the current mediate nodes, including the stopNode
+		while (stopNode != nodeP)
+		{
+			// call the function for mediate nodes
+		}
+
+		// add the (4, 12) back to P
+		if (!(minX == msg._a))
+		{
+			nodeP->appendXinWeightProcess(msg._a);
+		}
+	}
+
+	
+
+
+
+
+
+
 }
