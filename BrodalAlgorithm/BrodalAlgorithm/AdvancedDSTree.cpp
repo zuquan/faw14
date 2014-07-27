@@ -893,25 +893,23 @@ void AdvancedDSTree::unitTestDS(string str)
 }
 
 
-vector<X> AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x)
+void AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x, vector<X> &rset)
 {
-	vector<X> replaceableSetOfP;
+	rset.clear();
 
 	sort(node->_matched.begin(), node->_matched.end(), cmpX3);
 	vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), x);	
 	for (vector<X>::iterator itL = node->_matched.begin(); itL != it; itL++)
 	{
-		replaceableSetOfP.push_back(*itL);
+		rset.push_back(*itL);
 	}
-
-	return replaceableSetOfP;
 }
 
-vector<X> AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X x)
+void AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X x, vector<X> &rset)
 {
-	vector<X> replaceableSetOfLeftChild;
-	vector<Y>* pEEValues;
+	rset.clear();
 
+	vector<Y>* pEEValues;
 	if (node->_rightChild != NULL)
 	{
 		pEEValues = &node->_rightChild->_values;
@@ -926,18 +924,17 @@ vector<X> AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X 
 	sort(node->_matched.begin(), node->_matched.end(), cmpXBegDec);
 	for (int i = 0; i < l; i++)
 	{
-		replaceableSetOfLeftChild.push_back(node->_matched[i]);
+		rset.push_back(node->_matched[i]);
 	}
-
-	return replaceableSetOfLeftChild;
 }
 
-X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode)
+X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X newX)
 {
 	AdvancedDSTreeNode* curNode = infeasibleNode;
 	X curMinWeightX;
 	vector<X> curRInNode;
 	// get curRInNode;
+	replaceableSetOfP(infeasibleNode, newX, curRInNode);
 	sort(curRInNode.begin(), curRInNode.end(), cmpXWeight);
 	curMinWeightX = curRInNode[0];
 	sort(curRInNode.begin(), curRInNode.end(), cmpXBegin);
@@ -946,7 +943,8 @@ X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode)
 		while (true)
 		{
 			curNode = curNode->_leftChild;
-			//get curRInNode in the left child, provide the transferred X with min begin: curRInNode[0](parent's), curNode
+			//get curRInNode in the left child, provide the transferred X with min begin: curRInNode[0](parent's), curNode			
+			repalceableSetOfLeftChild(curNode, curRInNode[0], curRInNode);
 			sort(curRInNode.begin(), curRInNode.end(), cmpXWeight);
 			if (cmpXWeight(curRInNode[0], curMinWeightX) == true)
 			{

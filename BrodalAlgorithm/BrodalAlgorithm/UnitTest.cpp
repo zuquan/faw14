@@ -14,6 +14,26 @@ bool cmpY_UT(Y y1, Y y2)
 	return y1._y < y2._y;
 }
 
+// priority: increasing begin, increasing end, increasing id
+bool cmpXBegInc(X x1, X x2)
+{
+	if (x1._begin == x2._begin)
+	{
+		if (x1._end == x2._end)
+		{
+			return x1._id < x2._id;
+		}
+		else
+		{
+			return x1._end < x2._end;
+		}
+	}
+	else
+	{
+		return x1._begin < x2._begin;
+	}
+}
+
 void UnitTest::testTest()
 {
 	cout << "in UnitTest";
@@ -306,4 +326,13 @@ void UnitTest::testEETree(AdvancedDSTree * tree)
 {
 	int b = tree->_root->_pEETree->getLbyK(1);
 	int a = 0;
+}
+
+void UnitTest::testLbyK(AdvancedDSTreeNode * node, X x)
+{
+	sort(node->_matched.begin(), node->_matched.end(), cmpXBegInc);
+	vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), x);
+
+
+
 }

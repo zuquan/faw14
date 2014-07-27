@@ -64,9 +64,9 @@ private:
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
 	X gloverMatchingInLeafForAnY(AdvancedDSTreeNode*, Y);
 
-	vector<X> replaceableSetOfP(AdvancedDSTreeNode*, X);
-	vector<X> repalceableSetOfLeftChild(AdvancedDSTreeNode*, X);
-	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode);
+	void replaceableSetOfP(AdvancedDSTreeNode*, X, vector<X> &);
+	void repalceableSetOfLeftChild(AdvancedDSTreeNode*, X, vector<X> &);
+	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X);
 	bool continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& replaceableX);
 	
 public:

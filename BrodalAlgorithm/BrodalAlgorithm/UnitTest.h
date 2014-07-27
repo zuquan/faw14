@@ -28,9 +28,8 @@ public:
 	X mateOfY(Y);
 
 	void verifiyESTree(ESTreeNode* node);
-
 	void testLocatIndexL(AdvancedDSTree *);
-
 	void testEETree(AdvancedDSTree * tree);
+	void testLbyK(AdvancedDSTreeNode *, X);
 
 };
