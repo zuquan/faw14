@@ -1061,3 +1061,72 @@ vector<Y> AdvancedDSTreeNode::getESValues()
 		return _values;
 	}
 }
+
+
+AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX)
+{
+	//return value
+	AdvancedDSTreeNode* anc;
+	//for the first time, remember removeX minx from ESTreeEETree
+	vector<X>::iterator minx = find(_matched.begin(), _matched.end(), minWeightX);
+	_matched.erase(minx);
+	_infeasible.push_back(minWeightX);
+
+	//select
+	vector<X> tm;
+
+	for (unsigned int i = 0; i < _transferred.size(); i++)
+	{
+		X curX = _transferred[i];
+		if (find(infeasibleNode->_matched.begin(), infeasibleNode->_matched.end(), curX) != infeasibleNode->_matched.end())
+			//|| find(_parent->_transferred.begin(), _parent->_transferred.end(), curX) != _parent->_transferred.end())
+			//if (find(_parent->_infeasible.begin(), _parent->_infeasible.end(), curX) == _parent->_infeasible.end())
+		{
+			//finally matched
+			tm.push_back(curX);
+		}
+	}
+
+	sort(tm.begin(), tm.end(), cmpX3);
+	X backX = tm[0];
+
+	//add backX into current Node
+	vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), backX);
+	_transferred.erase(it);
+
+	_pESTree->appendVariable(sizeOfY(getESValues()[0],backX._end));
+	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(getESValues()[0], backX._begin));
+	_matched.push_back(backX);
+	_matched2.push_back(backX);
+	
+	//deal with the jumped DSNodes
+	AdvancedDSTreeNode* curNode = this;
+	while (true)
+	{
+		curNode = curNode->_parent;
+		vector<X>::iterator it = find(curNode->_transferred.begin(), curNode->_transferred.end(), backX);
+		if (it != curNode->_transferred.end())
+		{
+			//backX in transferred
+			//pull back, no influence to ES or EE
+			curNode->_transferred.erase(it);
+			curNode->_matched.push_back(backX);
+			//erase minWeightX
+			vector<X>::iterator it2 = find(curNode->_matched.begin(), curNode->_matched.end(), minWeightX);
+			curNode->_matched.erase(it2);
+			curNode->_infeasible.push_back(minWeightX);
+		}
+		else
+		{
+			//not in transferred, must in matched2
+			//delete backX from matched2, keep in matched
+			vector<X>::iterator it2 = find(curNode->_matched2.begin(), curNode->_matched2.end(), backX);
+			curNode->_matched2.erase(it2);
+			curNode->_pESTree->deleteVariable(sizeOfY(curNode->getESValues()[0], backX._end));
+			curNode->_pEETree->deleteVariable(curNode->_pEETree->allLeafNum() - sizeOfY(curNode->getESValues()[0], backX._begin));
+			anc = curNode;
+			break;
+		}
+	}
+	return anc;
+}
