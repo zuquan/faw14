@@ -71,10 +71,10 @@ private:
 
 	void replaceableSetOfP(AdvancedDSTreeNode*, X, X, vector<X> &);
 	void repalceableSetOfLeftChild(AdvancedDSTreeNode*, X, vector<X> &);
-	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X, X, AdvancedDSTreeNode*);
+	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X, X, AdvancedDSTreeNode*&);
 	bool continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& replaceableX);
 
-	void replaceMinWeightX(AdvancedDSTreeNode*, Msg);
+	X replaceMinWeightX(AdvancedDSTreeNode*, Msg);
 	
 public:
 	AdvancedDSTree();
