@@ -341,7 +341,14 @@ bool AdvancedDSTree::insertX(X &x)
 				msg._c = tempMsg._c;
 				if (tempMsg._c == 2)
 				{
-					//
+					//delete a from ESTree && EETree , add b back into ESEETree
+					if (!(tempMsg._a == tempMsg._b))
+					{
+						leaf->_parent->removeXinWeightProcess(tempMsg._a);	// tempMsg._a is the original msg._b
+						leaf->_parent->appendXinWeightProcess(tempMsg._b);
+					}					
+					X tempx = determineMinWeightX(leaf->_parent, tempMsg._a, tempMsg._b);
+					int a = 0;
 				}
 			}
 		}
@@ -361,9 +368,11 @@ bool AdvancedDSTree::insertX(X &x)
 			else
 			{
 				Msg tempMsg = leaf->_parent->insertX(msg._a);
-				// equvilant to check whether msg._b exists in the matched set of parent. If it is, then delete it.
+				
 				sort(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), cmpX3);
 				vector<X>::iterator itTemp = find(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), msg._b);
+
+				// equvilant to check whether msg._b exists in the matched set of parent. If it is, then delete it.
 				// if (tempMsg._bEmpty == false && msg._bEmpty == false && cmpX3(msg._b, tempMsg._b) == true)		//msg._b<tempMsg._b
 				if (tempMsg._bEmpty == false && msg._bEmpty == false && itTemp != leaf->_parent->_matched.end())
 				{
@@ -382,8 +391,14 @@ bool AdvancedDSTree::insertX(X &x)
 
 					if (tempMsg._c == 2)
 					{
-						//
-
+						//delete a from ESTree && EETree , add b back into ESEETree
+						if (!(tempMsg._a == tempMsg._b))
+						{
+							leaf->_parent->removeXinWeightProcess(tempMsg._a);
+							leaf->_parent->appendXinWeightProcess(tempMsg._b);
+						}
+						X tempx = determineMinWeightX(leaf->_parent, tempMsg._a, tempMsg._b);
+						int a = 0;
 
 					}
 				}
@@ -408,7 +423,7 @@ bool AdvancedDSTree::insertX(X &x)
 	return true;
 }
 
-// call by parent
+// call by parent in Brodal process
 void AdvancedDSTreeNode::removeX(Msg m)
 {
 	_pESTree->deleteVariable(sizeOfY(_rightChild->_values[0], m._b._end));
@@ -429,6 +444,27 @@ void AdvancedDSTreeNode::removeX(Msg m)
 	_matched2.erase(it1);	// delete b in the matched2 set of parent
 }
 
+// call by parent in Weight Matching case;
+void AdvancedDSTreeNode::removeXinWeightProcess(X x)
+{
+	vector<Y>* pESValues;
+	if (_rightChild != NULL)
+	{
+		pESValues = &_rightChild->_values;
+	}
+	else
+	{
+		pESValues = &_values;
+	}
+	_pESTree->deleteVariable(sizeOfY((*pESValues)[0], x._end));
+	_pEETree->deleteVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], x._begin));
+
+	vector<X>::iterator it = find(_matched.begin(), _matched.end(), x);
+	_matched.erase(it);	// delete b in the matched set of parent
+	vector<X>::iterator it1 = find(_matched2.begin(), _matched2.end(), x);
+	_matched2.erase(it1);	// delete b in the matched2 set of parent
+}
+
 void AdvancedDSTreeNode::appendX(Msg m)
 {
 
@@ -446,6 +482,27 @@ void AdvancedDSTreeNode::appendX(Msg m)
 	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(_rightChild->_values[0], m._b._begin));
 	_matched.push_back(m._b);
 	_matched2.push_back(m._b);
+}
+
+void AdvancedDSTreeNode::appendXinWeightProcess(X x)
+{
+	vector<Y>* pESValues;
+	if (_rightChild != NULL)
+	{
+		pESValues = &_rightChild->_values;
+	}
+	else
+	{
+		pESValues = &_values;
+	}
+	
+	vector<X>::iterator it = find(_infeasible.begin(), _infeasible.end(), x);
+	_infeasible.erase(it);	
+
+	_pESTree->appendVariable(sizeOfY((*pESValues)[0], x._end));
+	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], x._begin));
+	_matched.push_back(x);
+	_matched2.push_back(x);
 }
 
 
@@ -893,16 +950,19 @@ void AdvancedDSTree::unitTestDS(string str)
 }
 
 
-void AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x, vector<X> &rset)
+void AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x1, X jX, vector<X> &rset)
 {
 	rset.clear();
 
-	sort(node->_matched.begin(), node->_matched.end(), cmpX3);
-	vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), x);	
-	for (vector<X>::iterator itL = node->_matched.begin(); itL != it; itL++)
+	sort(node->_matched2.begin(), node->_matched2.end(), cmpX3);
+	vector<X>::iterator itL = node->_matched2.begin();
+
+	while (itL != node->_matched2.end() && itL->_end <= jX._end)
 	{
 		rset.push_back(*itL);
-	}
+		itL++;
+	} 
+	rset.push_back(x1);	// add the inserted x iteself
 }
 
 void AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X x, vector<X> &rset)
@@ -921,24 +981,27 @@ void AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X x, ve
 
 	int kOfX = node->sizeOfY((*pEEValues)[0], x._begin);
 	int l = node->_pEETree->getLbyK(node->_pEETree->allLeafNum() - kOfX);	// m+1-k'
-	sort(node->_matched.begin(), node->_matched.end(), cmpXBegDec);
+	sort(node->_matched2.begin(), node->_matched2.end(), cmpXBegDec);
 	for (int i = 0; i < l; i++)
 	{
-		rset.push_back(node->_matched[i]);
+		rset.push_back(node->_matched2[i]);
 	}
+	rset.push_back(x);	// add the inserted x iteself
 }
 
-X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X newX)
+X AdvancedDSTree::determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X newX, X jX)
 {
 	AdvancedDSTreeNode* curNode = infeasibleNode;
 	X curMinWeightX;
 	vector<X> curRInNode;
 	// get curRInNode;
-	replaceableSetOfP(infeasibleNode, newX, curRInNode);
+	replaceableSetOfP(infeasibleNode, newX, jX, curRInNode);
 	sort(curRInNode.begin(), curRInNode.end(), cmpXWeight);
 	curMinWeightX = curRInNode[0];
 	sort(curRInNode.begin(), curRInNode.end(), cmpXBegin);
-	if (curRInNode[0]._begin < infeasibleNode->_values[0])// there is at least a transferred X matchs 1-j
+
+	vector<Y> esY = infeasibleNode->getESValues();
+	if (curRInNode[0]._begin < esY[0])// there is at least a transferred X matchs 1-j
 	{
 		while (true)
 		{
@@ -974,7 +1037,7 @@ bool AdvancedDSTree::continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& r
 	else
 	{
 		sort(replaceableX.begin(), replaceableX.end(), cmpXBegin);
-		if (replaceableX[0]._begin < curNode->_values[0])
+		if (replaceableX[0]._begin < curNode->getESValues()[0])
 		{
 			return true;
 		}
@@ -984,4 +1047,17 @@ bool AdvancedDSTree::continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& r
 		}
 	}
 
+}
+
+
+vector<Y> AdvancedDSTreeNode::getESValues()
+{
+	if (_rightChild != NULL)
+	{
+		return _rightChild->_values;
+	}
+	else
+	{
+		return _values;
+	}
 }

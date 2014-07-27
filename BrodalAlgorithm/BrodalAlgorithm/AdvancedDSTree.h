@@ -36,11 +36,14 @@ private:
 
 	void removeX(Msg m);	//for the case of msg fail-success and fail-fail expcetional.
 	void appendX(Msg m);
-	
+
+	void removeXinWeightProcess(X x);
+	void appendXinWeightProcess(X x);
+
 	void replaceMinX();		// find the min replaceable x and repalce it.
 	bool findExtensionX();	// whether there is a extension x from transferred L
 	
-
+	vector<Y> getESValues();
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
@@ -64,9 +67,9 @@ private:
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
 	X gloverMatchingInLeafForAnY(AdvancedDSTreeNode*, Y);
 
-	void replaceableSetOfP(AdvancedDSTreeNode*, X, vector<X> &);
+	void replaceableSetOfP(AdvancedDSTreeNode*, X, X, vector<X> &);
 	void repalceableSetOfLeftChild(AdvancedDSTreeNode*, X, vector<X> &);
-	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X);
+	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X, X);
 	bool continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& replaceableX);
 	
 public:
