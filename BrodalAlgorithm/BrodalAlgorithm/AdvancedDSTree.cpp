@@ -5,6 +5,7 @@
 
 extern vector<Y> allExistingY;
 extern UnitTest * ut;
+extern ofstream olog;
 
 bool cmpY(Y y1, Y y2)
 {
@@ -424,7 +425,16 @@ bool AdvancedDSTree::insertX(X &x)
 		if (msg._bEmpty == false)	// b, which will be deleted, is in matched before
 		{
 			_root->update.push_back(msg._b);
+			olog << "insert id:" << msg._a._id << " replace id:" << msg._b._id << endl;
 		}
+		else
+		{
+			olog << "insert id:" << msg._a._id << " success" << endl;
+		}
+	}
+	else
+	{
+		olog << "insert id:" << msg._a._id << " fail" << endl;
 	}
 
 	return true;
@@ -1072,6 +1082,7 @@ vector<Y> AdvancedDSTreeNode::getESValues()
 // msg._a is the x vertex added into the node P
 X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 {
+	//cout << "Replace Min" << endl;
 	//delete a from ESTree && EETree , add b back into ESEETree
 	if (!(msg._a == msg._b))
 	{
