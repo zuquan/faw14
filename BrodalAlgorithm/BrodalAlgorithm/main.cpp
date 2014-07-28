@@ -11,6 +11,8 @@ vector<X> allExistingX;
 UnitTest * ut;
 
 void generator(char *);
+ofstream olog("replaceLogFAW.txt");
+
 
 int main()
 {
@@ -70,7 +72,7 @@ int main()
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
 
-				  if (x._id == 29)
+				  if (x._id == 9)
 				  {
 					  int a = 0;
 				  }
@@ -148,7 +150,7 @@ int main()
 	
 	//pTree->unitTestDS("DSTREE");	// unit test
 	cout << "end" << endl;
-	
+	olog.close();
 
 	ut = new UnitTest(allExistingX, allExistingY);
 	ut->unitTestWeightXMatchedSet(pTree);
