@@ -1156,7 +1156,6 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 
 	//select
 	vector<X> tm;
-	tm.push_back(insertedX);
 
 	for (unsigned int i = 0; i < _transferred.size(); i++)
 	{
@@ -1170,15 +1169,15 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 		}
 	}
 	X backX;
-	/*if (tm.size() == 0)
+	if (tm.size() == 0)
 	{
 		backX = insertedX;
 	}
 	else
-	{*/
+	{
 		sort(tm.begin(), tm.end(), cmpX3);
 		backX = tm[0];
-	/*}*/
+	}
 
 
 	//add backX into current Node

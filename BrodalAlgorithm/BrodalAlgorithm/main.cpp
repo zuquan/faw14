@@ -17,7 +17,7 @@ ofstream olog("replaceLogFAW.txt");
 int main()
 {
 	//open a file
-	generator("input.txt");
+	//generator("input.txt");
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
 	if (!in)
@@ -72,7 +72,7 @@ int main()
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
 
-				  if (x._id == 9)
+				  if (x._id == 13)
 				  {
 					  int a = 0;
 				  }
