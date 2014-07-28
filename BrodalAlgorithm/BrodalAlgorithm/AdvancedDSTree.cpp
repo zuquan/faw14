@@ -314,9 +314,8 @@ bool AdvancedDSTree::insertX(X &x)
 	Msg msg = leaf->insertX(x);		// insert the x into the leaf
 	if (msg._c == 2)
 	{
-		msg._b = replaceMinWeightX(leaf, msg);
+		msg._b = replaceMinWeightX(leaf, msg);		// call replaceable algorithm
 		int a = 0;
-
 	}
 
 	while (leaf->_parent != NULL)	//send msg until the root, the msg is from a node to its parent
@@ -347,17 +346,8 @@ bool AdvancedDSTree::insertX(X &x)
 				msg._c = tempMsg._c;
 				if (tempMsg._c == 2)
 				{
-					msg._b = replaceMinWeightX(leaf->_parent, tempMsg);
-					int a = 0;
-
-					////delete a from ESTree && EETree , add b back into ESEETree
-					//if (!(tempMsg._a == tempMsg._b))
-					//{
-					//	leaf->_parent->removeXinWeightProcess(tempMsg._a);	// tempMsg._a is the original msg._b
-					//	leaf->_parent->appendXinWeightProcess(tempMsg._b);
-					//}					
-					//X tempx = determineMinWeightX(leaf->_parent, tempMsg._a, tempMsg._b);
-					//int a = 0;
+					msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replaceable algorithm
+					int a = 0;					
 				}
 			}
 		}
@@ -377,7 +367,7 @@ bool AdvancedDSTree::insertX(X &x)
 			else
 			{
 				Msg tempMsg = leaf->_parent->insertX(msg._a);
-				
+
 				sort(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), cmpX3);
 				vector<X>::iterator itTemp = find(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), msg._b);
 
@@ -400,15 +390,7 @@ bool AdvancedDSTree::insertX(X &x)
 
 					if (tempMsg._c == 2)
 					{
-						msg._b = replaceMinWeightX(leaf->_parent, tempMsg);
-						////delete a from ESTree && EETree , add b back into ESEETree
-						//if (!(tempMsg._a == tempMsg._b))
-						//{
-						//	leaf->_parent->removeXinWeightProcess(tempMsg._a);
-						//	leaf->_parent->appendXinWeightProcess(tempMsg._b);
-						//}
-						//X tempx = determineMinWeightX(leaf->_parent, tempMsg._a, tempMsg._b);
-						//int a = 0;
+						msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replaceable algorithm		
 
 					}
 				}
@@ -454,10 +436,10 @@ void AdvancedDSTreeNode::removeX(Msg m)
 	_matched2.erase(it1);	// delete b in the matched2 set of parent
 }
 
-// call by parent in Weight Matching case ::: Undo infeasible insertion
+// call by parent in Weight Matching case ::: Undo infeasible insertion; only change EETree, ESTree and Matched, Matched2 sets
 void AdvancedDSTreeNode::removeXinWeightProcess(X x)
 {
-	vector<Y>* pESValues;
+	const vector<Y>* pESValues;
 	if (_rightChild != NULL)
 	{
 		pESValues = &_rightChild->_values;
@@ -470,15 +452,9 @@ void AdvancedDSTreeNode::removeXinWeightProcess(X x)
 	_pEETree->deleteVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], x._begin));
 
 	vector<X>::iterator it = find(_matched.begin(), _matched.end(), x);
-	if (it != _matched.end())
-	{
-		_matched.erase(it);	// delete b in the matched set of parent
-	}	
+	_matched.erase(it);	// delete b in the matched set of parent
 	vector<X>::iterator it1 = find(_matched2.begin(), _matched2.end(), x);
-	if (it1 != _matched2.end())
-	{
-		_matched2.erase(it1);	// delete b in the matched2 set of parent
-	}	
+	_matched2.erase(it1);	// delete b in the matched2 set of parent
 }
 
 void AdvancedDSTreeNode::appendX(Msg m)
@@ -500,9 +476,10 @@ void AdvancedDSTreeNode::appendX(Msg m)
 	_matched2.push_back(m._b);
 }
 
+// only change EETree, ESTree and Matched, Matched2 sets
 void AdvancedDSTreeNode::appendXinWeightProcess(X x)
 {
-	vector<Y>* pESValues;
+	const vector<Y>* pESValues;
 	if (_rightChild != NULL)
 	{
 		pESValues = &_rightChild->_values;
@@ -511,9 +488,6 @@ void AdvancedDSTreeNode::appendXinWeightProcess(X x)
 	{
 		pESValues = &_values;
 	}
-	
-	vector<X>::iterator it = find(_infeasible.begin(), _infeasible.end(), x);
-	_infeasible.erase(it);	
 
 	_pESTree->appendVariable(sizeOfY((*pESValues)[0], x._end));
 	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], x._begin));
@@ -977,7 +951,7 @@ void AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x1, X jX, vec
 	{
 		rset.push_back(*itL);
 		itL++;
-	} 
+	}
 	rset.push_back(x1);	// add the inserted x iteself
 }
 
@@ -1089,22 +1063,28 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		nodeP->removeXinWeightProcess(msg._a);	// tempMsg._a is the original msg._b
 		nodeP->appendXinWeightProcess(msg._b);
 	}
+	vector<X>::iterator it = find(nodeP->_infeasible.begin(), nodeP->_infeasible.end(), msg._b);
+	nodeP->_infeasible.erase(it);
 
-	AdvancedDSTreeNode * stopNode = NULL;
+	AdvancedDSTreeNode * stopNode = NULL;		// the node where the minX is in
 	X minX = determineMinWeightX(nodeP, msg._a, msg._b, stopNode);
 
 	if (stopNode == nodeP)
-	{
+	{		
 		if (!(minX == msg._a))
 		{
 			nodeP->removeXinWeightProcess(minX);
 			nodeP->appendXinWeightProcess(msg._a);
 		}
+		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == msg._a
 	}
 	else
 	{
-		// modify the stopNode
-		stopNode->removeXinWeightProcess(minX);
+		// modify the stopNode		
+		stopNode->_pESTree->deleteVariable(stopNode->sizeOfY(stopNode->getESValues()[0], minX._end));
+		stopNode->_pEETree->deleteVariable(stopNode->_pEETree->allLeafNum() - stopNode->sizeOfY(stopNode->getESValues()[0], minX._begin));
+		vector<X>::iterator it1 = find(stopNode->_matched2.begin(), stopNode->_matched2.end(), minX);
+		stopNode->_matched2.erase(it1);	
 
 		// modify the current mediate nodes, including the stopNode
 		while (stopNode != nodeP)
@@ -1115,14 +1095,13 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		// add the (4, 12) back to P
 		if (!(minX == msg._a))
 		{
+			// delete minX into infeasible
 			vector<X>::iterator tmpIt = find(nodeP->_matched.begin(), nodeP->_matched.end(), minX);
 			nodeP->_matched.erase(tmpIt);
-			//nodeP->appendXinWeightProcess(msg._a);
-			nodeP->_pESTree->appendVariable(nodeP->sizeOfY(nodeP->getESValues()[0], msg._a._end));
-			nodeP->_pEETree->appendVariable(nodeP->sizeOfY(nodeP->getESValues()[0], msg._a._begin));
-			nodeP->_matched.push_back(msg._a);
-			nodeP->_matched2.push_back(msg._a);
+			// add (4, 12), the inserted x which maybe transferred from a child
+			nodeP->appendXinWeightProcess(msg._a);
 		}
+		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == msg._a
 	}
 	return minX;
 }
@@ -1132,12 +1111,9 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 {
 	//return value
 	AdvancedDSTreeNode* anc;
-	//for the first time, remember removeX minx from ESTreeEETree
+	// //for the first time, remember removeX minx from ESTreeEETree
 	vector<X>::iterator minx = find(_matched.begin(), _matched.end(), minWeightX);
-	if (minx != _matched.end())
-	{
-		_matched.erase(minx);
-	}
+	_matched.erase(minx);
 	_infeasible.push_back(minWeightX);
 
 	//select
@@ -1164,17 +1140,17 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 		sort(tm.begin(), tm.end(), cmpX3);
 		backX = tm[0];
 	}
-	
+
 
 	//add backX into current Node
 	vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), backX);
 	_transferred.erase(it);
 
-	_pESTree->appendVariable(sizeOfY(getESValues()[0],backX._end));
+	_pESTree->appendVariable(sizeOfY(getESValues()[0], backX._end));
 	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(getESValues()[0], backX._begin));
 	_matched.push_back(backX);
 	_matched2.push_back(backX);
-	
+
 	//deal with the jumped DSNodes
 	AdvancedDSTreeNode* curNode = this;
 	while (true)
@@ -1204,12 +1180,13 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 				curNode->_matched2.erase(it2);
 				curNode->_pESTree->deleteVariable(sizeOfY(curNode->getESValues()[0], backX._end));
 				curNode->_pEETree->deleteVariable(curNode->_pEETree->allLeafNum() - sizeOfY(curNode->getESValues()[0], backX._begin));
+
 			}
 			else
 			{
 
 			}
-			
+
 			anc = curNode;
 			break;
 		}
