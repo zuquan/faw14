@@ -182,6 +182,11 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 
 void generator(char* fileName)
 {
+
+	/*int range = 5;	
+	int xnum = 10;
+	int maxw = 100;*/
+	
 	cout << "input range of Y" << endl;
 	int range;
 	cin >> range;
@@ -191,7 +196,7 @@ void generator(char* fileName)
 	int maxw;
 	cout << "input the max weight" << endl;
 	cin >> maxw;
-
+	
 	ofstream of(fileName);
 
 	of << range << endl;
@@ -209,10 +214,14 @@ void generator(char* fileName)
 
 	/*SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);*/
-	int seed;
+	/*int seed;
 	cout << "input seed of rand" << endl;
 	cin >> seed;
-	srand(seed);
+	srand(seed);*/
+
+	SYSTEMTIME lpsystime;
+	GetLocalTime(&lpsystime);
+	srand(lpsystime.wMilliseconds);
 
 	for (int i = 1; i <= xnum; i++)
 	{
