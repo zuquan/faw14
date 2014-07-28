@@ -1086,8 +1086,8 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 	//delete a from ESTree && EETree , add b back into ESEETree
 	if (!(msg._a == msg._b))
 	{
-		nodeP->removeXinWeightProcess(msg._a);	// tempMsg._a is the original msg._b
-		nodeP->appendXinWeightProcess(msg._b);
+		nodeP->removeXinWeightProcess(msg._a);	// tempMsg._a is the original msg._b   //remove with out check end
+		nodeP->appendXinWeightProcess(msg._b);  
 	}
 
 	AdvancedDSTreeNode * stopNode = NULL;
@@ -1098,7 +1098,7 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		if (!(minX == msg._a))
 		{
 			nodeP->removeXinWeightProcess(minX);
-			nodeP->appendXinWeightProcess(msg._a);
+			nodeP->appendXinWeightProcess(msg._a);  //couldn't find in infeasible set
 		}
 	}
 	else
@@ -1137,8 +1137,9 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 	if (minx != _matched.end())
 	{
 		_matched.erase(minx);
+		_infeasible.push_back(minWeightX);
 	}
-	_infeasible.push_back(minWeightX);
+	
 
 	//select
 	vector<X> tm;
