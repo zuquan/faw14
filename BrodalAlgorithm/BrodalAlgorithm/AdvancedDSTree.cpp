@@ -198,12 +198,19 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 	node->_matched.clear();
 	node->_matched2.clear();
 	node->_transferred.clear();
-	node->_infeasible.clear();
+	// node->_infeasible.clear();	// change the logic in weighted case, since infeasible may caused by parent nodes
 
 	// for each variables in the previous node, reinsert into the left child
 	for (int i = 0; i < (int)node->_variables.size(); i++)
 	{
 		tmpX = node->_variables[i];
+		// if x belongs to node.infeasible, add it into leftchild.infeasible directly
+		if (find(node->_infeasible.begin(), node->_infeasible.end(), tmpX) != node->_infeasible.end())
+		{
+			leftChild->_infeasible.push_back(tmpX);
+			continue;
+		}
+		
 		msg = leftChild->insertX(tmpX);		// insert into the left child
 		switch (msg._c)
 		{
