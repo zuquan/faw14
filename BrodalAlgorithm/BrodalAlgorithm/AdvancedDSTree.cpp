@@ -216,14 +216,22 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 					node->_matched.push_back(tmpX);
 					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
 					node->_matched.erase(it);
-					node->insertX(msg._b);
+					Msg tmpMsg = node->insertX(msg._b);
+					if (tmpMsg._c == 2)
+					{
+						replaceMinWeightX(node, tmpMsg);		// call replaceable algorithm
+						int a = 0;
+					}
 		}break;
 		case 2:	// infeasible, add a into matched, remove b from matched and insert it into infeasible
 		{
+					X tmpMinX = replaceMinWeightX(node->_leftChild, msg);		// call replaceable algorithm
+					int a = 0;
+
 					node->_matched.push_back(tmpX);
-					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
+					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), tmpMinX);
 					node->_matched.erase(it);
-					node->_infeasible.push_back(msg._b);
+					node->_infeasible.push_back(tmpMinX);
 		}break;
 		}
 	}
