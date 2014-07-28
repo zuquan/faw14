@@ -1060,8 +1060,8 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 	//delete a from ESTree && EETree , add b back into ESEETree
 	if (!(msg._a == msg._b))
 	{
-		nodeP->removeXinWeightProcess(msg._a);	// tempMsg._a is the original msg._b
-		nodeP->appendXinWeightProcess(msg._b);
+		nodeP->removeXinWeightProcess(msg._a);	// tempMsg._a is the original msg._b   //remove with out check end
+		nodeP->appendXinWeightProcess(msg._b);  
 	}
 	vector<X>::iterator it = find(nodeP->_infeasible.begin(), nodeP->_infeasible.end(), msg._b);
 	nodeP->_infeasible.erase(it);
@@ -1074,7 +1074,7 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		if (!(minX == msg._a))
 		{
 			nodeP->removeXinWeightProcess(minX);
-			nodeP->appendXinWeightProcess(msg._a);
+			nodeP->appendXinWeightProcess(msg._a);  //couldn't find in infeasible set
 		}
 		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == msg._a
 	}
