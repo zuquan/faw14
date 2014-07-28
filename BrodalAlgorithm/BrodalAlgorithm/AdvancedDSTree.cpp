@@ -391,7 +391,7 @@ bool AdvancedDSTree::insertX(X &x)
 					if (tempMsg._c == 2)
 					{
 						msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replaceable algorithm		
-
+						int a = 0;
 					}
 				}
 
@@ -1087,19 +1087,31 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		stopNode->_matched2.erase(it1);	
 
 		// modify the current mediate nodes, including the stopNode
+		bool backXeqInsertX = false;
 		while (stopNode != nodeP)
 		{
-			stopNode = stopNode->pullBackATransferredXInWeightProcess(nodeP, minX, msg._a);
+			stopNode = stopNode->pullBackATransferredXInWeightProcess(nodeP, minX, msg._a, backXeqInsertX);
 		}
 
-		// add the (4, 12) back to P
+		// add the (4, 12) back to P, consider the relation among minX, backX and insertedX
 		if (!(minX == msg._a))
 		{
 			// delete minX into infeasible
 			vector<X>::iterator tmpIt = find(nodeP->_matched.begin(), nodeP->_matched.end(), minX);
 			nodeP->_matched.erase(tmpIt);
 			// add (4, 12), the inserted x which maybe transferred from a child
-			nodeP->appendXinWeightProcess(msg._a);
+			
+			/*nodeP->_pESTree->appendVariable(nodeP->sizeOfY(nodeP->getESValues()[0], msg._a._end));
+			nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->getESValues()[0], msg._a._begin));
+			nodeP->_matched.push_back(msg._a);*/
+			if (backXeqInsertX == true)
+			{
+				nodeP->_matched.push_back(msg._a);
+			}
+			else
+			{
+				nodeP->appendXinWeightProcess(msg._a);
+			}
 		}
 		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == msg._a
 	}
@@ -1107,7 +1119,7 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 }
 
 
-AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, X insertedX)
+AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, X insertedX, bool& backXeqInsertX)
 {
 	//return value
 	AdvancedDSTreeNode* anc;
@@ -1180,11 +1192,11 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 				curNode->_matched2.erase(it2);
 				curNode->_pESTree->deleteVariable(sizeOfY(curNode->getESValues()[0], backX._end));
 				curNode->_pEETree->deleteVariable(curNode->_pEETree->allLeafNum() - sizeOfY(curNode->getESValues()[0], backX._begin));
-
+				backXeqInsertX = false;
 			}
 			else
 			{
-
+				backXeqInsertX = true;
 			}
 
 			anc = curNode;

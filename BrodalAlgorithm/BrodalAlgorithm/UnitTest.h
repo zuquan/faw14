@@ -32,4 +32,5 @@ public:
 	void testEETree(AdvancedDSTree * tree);
 	void testLbyK(AdvancedDSTreeNode *, X);
 
+	void unitTestWeightXMatchedSet(AdvancedDSTree *);
 };

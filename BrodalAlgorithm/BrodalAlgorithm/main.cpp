@@ -10,12 +10,12 @@ vector<Y> allExistingY;	// TBD: use BST to store Y nodes
 vector<X> allExistingX;
 UnitTest * ut;
 
-void generator();
+void generator(char *);
 
 int main()
 {
 	//open a file
-	//generator();
+	//generator("input.txt");
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
 	if (!in)
@@ -69,6 +69,11 @@ int main()
 				  {
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
+
+				  if (x._id == 13)
+				  {
+					  int a = 0;
+				  }
 				  pTree->insertX(x);
 		}break;
 
@@ -144,42 +149,44 @@ int main()
 	//pTree->unitTestDS("DSTREE");	// unit test
 	cout << "end" << endl;
 	
-	
-
 
 	ut = new UnitTest(allExistingX, allExistingY);
-	ut->printUnitTest();
+	ut->unitTestWeightXMatchedSet(pTree);
 
-	ut->testEETree(pTree);
 
-	for (int i = 0; i < allExistingX.size(); i++)
-	{
-		X x = allExistingX[i];
-		if (pTree->isXMatched(x) == true)
-		{
-			out << "x:" << x._id << " is matched with y:" << pTree->queryXMate(x) << endl;
-		}
-		else
-		{
-			out << "x:" << x._id << " is not matched." << endl;
-		}
-	}
 
-	for (int i = 0; i < allExistingY.size(); i++)
-	{
-		Y y = allExistingY[i];
-		if (pTree->isYMatched(y) == true)
-		{
-			out << "y:" << y._y << " is matched with x:" << pTree->queryYMate(y) << endl;
-		}
-		else
-		{
-			out << "y:" << y._y << " is not matched." << endl;
-		}
-	}
+	//ut->printUnitTest();
 
-	// unit test
-	ut->testLocatIndexL(pTree);
+	//ut->testEETree(pTree);
+
+	//for (int i = 0; i < allExistingX.size(); i++)
+	//{
+	//	X x = allExistingX[i];
+	//	if (pTree->isXMatched(x) == true)
+	//	{
+	//		out << "x:" << x._id << " is matched with y:" << pTree->queryXMate(x) << endl;
+	//	}
+	//	else
+	//	{
+	//		out << "x:" << x._id << " is not matched." << endl;
+	//	}
+	//}
+
+	//for (int i = 0; i < allExistingY.size(); i++)
+	//{
+	//	Y y = allExistingY[i];
+	//	if (pTree->isYMatched(y) == true)
+	//	{
+	//		out << "y:" << y._y << " is matched with x:" << pTree->queryYMate(y) << endl;
+	//	}
+	//	else
+	//	{
+	//		out << "y:" << y._y << " is not matched." << endl;
+	//	}
+	//}
+
+	//// unit test
+	//ut->testLocatIndexL(pTree);
 	
 	
 

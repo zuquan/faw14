@@ -126,7 +126,7 @@ X UnitTest::mateOfY(Y y)
 void UnitTest::testGloverMatching(vector<X> inputX, vector<Y>inputY,
 	vector<X>& resultX, vector<Y>& resultY, vector<M>& resultM)
 {
-	
+
 	for (int i = 0; i < inputY.size(); i++)
 	{
 		vector<X> selectedX;
@@ -180,14 +180,19 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 	}
 }
 
-void generator()
+void generator(char* fileName)
 {
+	cout << "input range of Y" << endl;
 	int range;
 	cin >> range;
 	int xnum;
+	cout << "input the number of X" << endl;
 	cin >> xnum;
+	int maxw;
+	cout << "input the max weight" << endl;
+	cin >> maxw;
 
-	ofstream of("input.txt");
+	ofstream of(fileName);
 
 	of << range << endl;
 
@@ -202,9 +207,12 @@ void generator()
 	vector<int> end;
 	vector<int> weight;
 
-	SYSTEMTIME lpsystime;
-	GetLocalTime(&lpsystime);
-	srand(lpsystime.wMilliseconds);
+	/*SYSTEMTIME lpsystime;
+	GetLocalTime(&lpsystime);*/
+	int seed;
+	cout << "input seed of rand" << endl;
+	cin >> seed;
+	srand(seed);
 
 	for (int i = 1; i <= xnum; i++)
 	{
@@ -220,7 +228,7 @@ void generator()
 		}
 		begin.push_back(b);
 		end.push_back(e);
-		int w = rand() % 100 + 1;
+		int w = rand() % maxw + 1;
 		weight.push_back(w);
 	}
 
@@ -236,13 +244,13 @@ void generator()
 	}
 	/*for (int i = 1; i <= xnum; i++)
 	{
-		of << endl;
-		of << 6 << " " << i << " " << begin[i - 1] << " " << end[i - 1];
-	}*/
-	/*for (int i = 1; i <= range; i++)
+	of << endl;
+	of << 6 << " " << i << " " << begin[i - 1] << " " << end[i - 1] << " "<<weight[i - 1];
+	}
+	for (int i = 1; i <= range; i++)
 	{
-		of << endl;
-		of << 8 << " " << i;
+	of << endl;
+	of << 8 << " " << i;
 	}*/
 	of << endl;
 	of << '$' << endl;
@@ -263,7 +271,7 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 		root = root->_parent;
 	}
 
-	ofstream out("debug.txt", ios_base::in|ios_base::app);
+	ofstream out("debug.txt", ios_base::in | ios_base::app);
 
 	// cout << "debug ESTREE format: (index, add, min, leafNum)" << endl;
 	deque<ESTreeNode*> queue;
@@ -288,7 +296,7 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 			//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
 		}
 		out << endl;
-	}	
+	}
 }
 
 void UnitTest::testLocatIndexL(AdvancedDSTree * tree)
@@ -335,4 +343,21 @@ void UnitTest::testLbyK(AdvancedDSTreeNode * node, X x)
 
 
 
+}
+
+
+void UnitTest::unitTestWeightXMatchedSet(AdvancedDSTree * tree)
+{
+	ofstream out("outputUT_FAW.txt");
+	// out << "test";
+
+	AdvancedDSTreeNode * node = tree->_root;
+	sort(node->_matched.begin(), node->_matched.end(), cmpX_ID);
+
+	for (int i = 0; i < node->_matched.size(); i++)
+	{
+		out << node->_matched[i]._id << endl;
+	}
+
+	out.close();
 }
