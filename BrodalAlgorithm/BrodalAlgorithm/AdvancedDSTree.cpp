@@ -401,7 +401,7 @@ bool AdvancedDSTree::insertX(X &x)
 				}
 			}
 			else
-			{
+			{	
 				Msg tempMsg = leaf->_parent->insertX(msg._a);
 
 				sort(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), cmpX3);
@@ -427,11 +427,12 @@ bool AdvancedDSTree::insertX(X &x)
 						tempMsg._b = fixInfeasible2TransCase(leaf, msg._a, tempMsg._b);	// find the right x to transfer
 					}
 
+					bool equalB = (msg._b == tempMsg._b);
 					msg._b = tempMsg._b;
 					msg._bEmpty = tempMsg._bEmpty;
 					msg._c = tempMsg._c;
 
-					if (tempMsg._c == 2)
+					if (tempMsg._c == 2 && equalB == false)
 					{
 						msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replaceable algorithm		
 						int a = 0;
