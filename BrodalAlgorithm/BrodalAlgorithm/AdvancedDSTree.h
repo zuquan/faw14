@@ -45,7 +45,8 @@ private:
 	
 	vector<Y> getESValues();
 
-	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, X insertedX, bool& backXeqInsertX);
+	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, Msg, bool& backXeqInsertX);
+	vector<X> getReferenceMatchedSet(AdvancedDSTreeNode* node, X x1, X jX);
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
@@ -75,6 +76,8 @@ private:
 	bool continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& replaceableX);
 
 	X replaceMinWeightX(AdvancedDSTreeNode*, Msg);
+
+	X fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, X removeX);
 	
 public:
 	AdvancedDSTree();

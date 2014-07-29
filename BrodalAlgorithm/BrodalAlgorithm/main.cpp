@@ -72,10 +72,10 @@ int main()
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
 
-				  if (x._id == 9)
+				  if (x._id == 13)
 				  {
 					  int a = 0;
-				  }
+				  }				  
 				  pTree->insertX(x);
 		}break;
 

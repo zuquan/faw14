@@ -15,7 +15,7 @@ bool cmpY_UT(Y y1, Y y2)
 }
 
 // priority: increasing begin, increasing end, increasing id
-bool cmpXBegInc(X x1, X x2)
+bool cmpXBegInc_UT(X x1, X x2)
 {
 	if (x1._begin == x2._begin)
 	{
@@ -183,11 +183,11 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 void generator(char* fileName)
 {
 
-	/*int range = 5;	
+	int range = 5;	
 	int xnum = 10;
-	int maxw = 100;*/
+	int maxw = 100;
 	
-	cout << "input range of Y" << endl;
+	/*cout << "input range of Y" << endl;
 	int range;
 	cin >> range;
 	int xnum;
@@ -195,7 +195,7 @@ void generator(char* fileName)
 	cin >> xnum;
 	int maxw;
 	cout << "input the max weight" << endl;
-	cin >> maxw;
+	cin >> maxw;*/
 	
 	ofstream of(fileName);
 
@@ -347,7 +347,7 @@ void UnitTest::testEETree(AdvancedDSTree * tree)
 
 void UnitTest::testLbyK(AdvancedDSTreeNode * node, X x)
 {
-	sort(node->_matched.begin(), node->_matched.end(), cmpXBegInc);
+	sort(node->_matched.begin(), node->_matched.end(), cmpXBegInc_UT);
 	vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), x);
 
 
