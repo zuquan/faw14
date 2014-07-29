@@ -1156,11 +1156,12 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 
 	//select
 	vector<X> tm;
-
+	vector<X> tempMatched = infeasibleNode->_matched;
+	//tempMatched.push_back(insertedX);
 	for (unsigned int i = 0; i < _transferred.size(); i++)
 	{
 		X curX = _transferred[i];
-		if (find(infeasibleNode->_matched.begin(), infeasibleNode->_matched.end(), curX) != infeasibleNode->_matched.end())
+		if (find(tempMatched.begin(), tempMatched.end(), curX) != tempMatched.end())
 			//|| find(_parent->_transferred.begin(), _parent->_transferred.end(), curX) != _parent->_transferred.end())
 			//if (find(_parent->_infeasible.begin(), _parent->_infeasible.end(), curX) == _parent->_infeasible.end())
 		{
