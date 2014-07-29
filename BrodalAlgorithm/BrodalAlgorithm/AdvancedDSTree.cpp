@@ -1208,6 +1208,7 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 
 	//select
 	vector<X> tm;
+
 	//tm.push_back(insertedX);
 	vector<X> baseofPullBack;
 	baseofPullBack = getReferenceMatchedSet(infeasibleNode, insertedX, msg._b);
@@ -1223,6 +1224,7 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 		X curX = _transferred[i];
 		if (find(baseofPullBack.begin(), baseofPullBack.end(), curX) != baseofPullBack.end())
 			//if (find(infeasibleNode->_matched.begin(), infeasibleNode->_matched.end(), curX) != infeasibleNode->_matched.end())
+
 			//|| find(_parent->_transferred.begin(), _parent->_transferred.end(), curX) != _parent->_transferred.end())
 			//if (find(_parent->_infeasible.begin(), _parent->_infeasible.end(), curX) == _parent->_infeasible.end())
 		{
@@ -1231,17 +1233,10 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 		}
 	}
 	X backX;
-	/*if (tm.size() == 0)
-	{
-	backX = insertedX;
-	}
-	else
-	{*/
+
 	// sort(tm.begin(), tm.end(), cmpX3);		// for now, take back the x with min(END)
 	sort(tm.begin(), tm.end(), cmpXBegInc);		// for now, take back the x with min(END)
 	backX = tm[0];
-	/*}*/
-
 
 	//add backX into current Node
 	vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), backX);
