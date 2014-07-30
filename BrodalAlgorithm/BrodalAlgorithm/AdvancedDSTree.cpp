@@ -216,12 +216,50 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 	AdvancedDSTreeNode* leftChild = node->_leftChild;
 	Msg msg;
 	X tmpX;
+	vector<X> tempMatched = node->_matched; 
 	node->_matched.clear();
+	vector<X> tempMatched2 = node->_matched2;
 	node->_matched2.clear();
-	node->_transferred.clear();
+	//vector<X> tempTransferred = node->_transferred;
+	//node->_transferred.clear();
 	// node->_infeasible.clear();	// change the logic in weighted case, since infeasible may caused by parent nodes
 
-	// for each variables in the previous node, reinsert into the left child
+	leftChild->_infeasible = node->_infeasible;
+	leftChild->_transferred = node->_transferred;
+
+	//matched == matched2 in the parent since it is a leaf previously
+	for (int i = 0; i<tempMatched.size(); i++)
+	{
+		tmpX = tempMatched[i];
+		msg = leftChild->insertX(tmpX);		// insert into the left child
+		switch (msg._c)
+		{
+		case 0:	// matched
+		{
+			node->_matched.push_back(tmpX);
+		}break;
+		case 1:	// transferred, add a into matched, delete b from matched, and add b into ES
+		{
+			node->_matched.push_back(tmpX);
+			vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
+			node->_matched.erase(it);
+			Msg tmpMsg = node->insertX(msg._b);
+			//no infeasible or transferred case
+			if (tmpMsg._c == 2 || tmpMsg._c == 1)
+			{
+				vector<X> t; t.erase(t.begin());	// for debug
+			}
+		}break;
+		case 2:	
+		{
+			//no infeasible case
+			vector<X> t; t.erase(t.begin());	// for debug
+		}break;
+		}
+	}
+
+	
+	/*// for each variables in the matched set of the previous node, reinsert into the left child
 	for (int i = 0; i < (int)node->_variables.size(); i++)
 	{
 		tmpX = node->_variables[i];
@@ -264,7 +302,7 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 					node->_infeasible.push_back(tmpMinX);
 		}break;
 		}
-	}
+	}*/
 }
 
 void AdvancedDSTree::splitDSNode(AdvancedDSTreeNode* node, X x)
