@@ -4,6 +4,8 @@
 #include<Windows.h>
 #include<time.h>
 
+extern ofstream outDebug;
+
 bool cmpX_ID(X x1, X x2)
 {
 	return x1._id < x2._id;
@@ -271,6 +273,13 @@ void generator(char* fileName)
 
 }
 
+void UnitTest::printRootESTree(AdvancedDSTree * tree)
+{
+	//outDebug << "ESTree " << endl;
+	verifiyESTree(tree->_root->_pESTree->_root);	
+	//outDebug << "EETree " << endl;
+	//verifiyESTree(tree->_root->_pEETree->_root);
+}
 
 void UnitTest::verifiyESTree(ESTreeNode* node)
 {
@@ -280,7 +289,8 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 		root = root->_parent;
 	}
 
-	ofstream out("debug.txt", ios_base::in | ios_base::app);
+	//ofstream outDebug("debug.txt", ios_base::in | ios_base::app);
+	//ofstream out("debug.txt");
 
 	// cout << "debug ESTREE format: (index, add, min, leafNum)" << endl;
 	deque<ESTreeNode*> queue;
@@ -290,7 +300,7 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 
 	while (queue.empty() == false)
 	{
-		cout << "level " << level++ << ": ";
+		outDebug << "level " << level++ << ": ";
 		int size = queue.size();
 		for (int i = 0; i < size; i++)
 		{
@@ -301,11 +311,20 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 				queue.push_back(tmp->_leftChild);
 				queue.push_back(tmp->_rightChild);
 			}
-			out << '(' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
-			//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			if (tmp->_leftChild != NULL)
+			{
+				outDebug << '(' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+				//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			}
+			else
+			{
+				outDebug << "( L: " << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			}
+			
 		}
-		out << endl;
+		outDebug << endl;
 	}
+	outDebug << endl;
 }
 
 void UnitTest::testLocatIndexL(AdvancedDSTree * tree)

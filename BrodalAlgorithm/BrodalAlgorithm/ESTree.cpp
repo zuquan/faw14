@@ -245,12 +245,12 @@ ESTreeNode* ESTree::locateLeafL(ESTreeNode* leafK)
 // update b_j from the leaf k to the leaf j
 void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 {
-	if (leafK == leafJ)
+	/*if (leafK == leafJ)
 	{
 		leafK->_add += diff;
 		updateMin(leafK);
 		return;
-	}
+	}*/
 
 	stack<ESTreeNode*> qk = getPathElements(leafK);
 	stack<ESTreeNode*> qj = getPathElements(leafJ);
@@ -311,6 +311,13 @@ void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 		anc->_add += diff;
 		updateMin(anc);
 	}
+}
+
+// for the x_k, increase the value of b_j from k-1 to m
+void ESTree::deleteVariable4J(int kOfX)
+{	
+	ESTreeNode* leafK = locateLeafK(kOfX - 1);	// this is the implementation model, so k -> k-1					
+	updateBjFromK2J(leafK, leafK, +1);			// update the value of b_j or _add for the leaf of j, implictly.
 }
 
 // for the x_k, increase the value of b_j from k-1 to m

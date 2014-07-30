@@ -33,4 +33,5 @@ public:
 	void testLbyK(AdvancedDSTreeNode *, X);
 
 	void unitTestWeightXMatchedSet(AdvancedDSTree *);
+	void UnitTest::printRootESTree(AdvancedDSTree *);
 };

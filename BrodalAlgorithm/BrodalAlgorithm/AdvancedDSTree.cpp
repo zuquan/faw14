@@ -6,6 +6,7 @@
 extern vector<Y> allExistingY;
 extern UnitTest * ut;
 extern ofstream olog;
+extern AdvancedDSTree* debugTree;
 
 bool cmpY(Y y1, Y y2)
 {
@@ -246,12 +247,14 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 					Msg tmpMsg = node->insertX(msg._b);
 					if (tmpMsg._c == 2)
 					{
+						vector<X> t; t.erase(t.begin());	// for debug
 						replaceMinWeightX(node, tmpMsg);		// call replaceable algorithm
 						int a = 0;
 					}
 		}break;
 		case 2:	// infeasible, add a into matched, remove b from matched and insert it into infeasible
 		{
+					vector<X> t; t.erase(t.begin());	// for debug
 					X tmpMinX = replaceMinWeightX(node->_leftChild, msg);		// call replaceable algorithm
 					int a = 0;
 
@@ -413,6 +416,11 @@ bool AdvancedDSTree::insertX(X &x)
 				{
 					leaf->_parent->removeX(msg);	// remove the msg._b from parent
 					leaf->_parent->appendX(tempMsg);	// pull the tempMsg._b back, since in this case, it comes from the left child.
+					//if (msg._b._end == tempMsg._b._end)	// to address the special case of a_j=j && msg._b.end=j
+					//{
+					//	leaf->_parent->_pESTree->deleteVariable4J(leaf->sizeOfY(leaf->_parent->getESValues()[0], msg._b._end));
+					//	//leaf->_parent->_pEETree->deleteVariable4J(leaf->_parent->_pEETree->allLeafNum() - leaf->sizeOfY(leaf->_parent->getESValues()[0], msg._b._end));
+					//}
 				}
 				else if (tempMsg._bEmpty == true && msg._bEmpty != true)
 				{
@@ -422,9 +430,8 @@ bool AdvancedDSTree::insertX(X &x)
 				{
 					// for speical inf2Trans case in weighted matching
 					if (tempMsg._bEmpty == false && msg._bEmpty == false && msg._c == 2 && tempMsg._c == 1)	
-					{
-						leaf->_parent->appendX(tempMsg);	// roll back to check
-						tempMsg._b = fixInfeasible2TransCase(leaf, msg._a, tempMsg._b);	// find the right x to transfer
+					{						
+						tempMsg._b = fixInfeasible2TransCase(leaf, msg._a, tempMsg);	// find the right x to transfer
 					}
 
 					bool equalB = (msg._b == tempMsg._b);
@@ -1107,30 +1114,37 @@ vector<Y> AdvancedDSTreeNode::getESValues()
 	}
 }
 
-// msg._a is the x vertex added into the node P
+// insertedX is the x vertex added into the node P
 X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 {
+	X insertedX = msg._a;
+	X removedX = msg._b;
 	//cout << "Replace Min" << endl;
 	//delete a from ESTree && EETree , add b back into ESEETree
-	if (!(msg._a == msg._b))
+	if (!(insertedX == removedX))
 	{
-		nodeP->removeXinWeightProcess(msg._a);	// tempMsg._a is the original msg._b   //remove with out check end
-		nodeP->appendXinWeightProcess(msg._b);
+		nodeP->removeXinWeightProcess(insertedX);	// tempMsg._a is the original removedX   //remove with out check end
+		nodeP->appendXinWeightProcess(removedX);
+		//if (insertedX._end == removedX._end)	// to address the special case of a_j=j && insertedX.end=j
+		//{
+		//	nodeP->_pESTree->deleteVariable4J(nodeP->sizeOfY(nodeP->getESValues()[0], insertedX._end));
+		//	//nodeP->_pEETree->deleteVariable4J(nodeP->_parent->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->getESValues()[0], insertedX._end));
+		//}
 	}
-	vector<X>::iterator it = find(nodeP->_infeasible.begin(), nodeP->_infeasible.end(), msg._b);
+	vector<X>::iterator it = find(nodeP->_infeasible.begin(), nodeP->_infeasible.end(), removedX);
 	nodeP->_infeasible.erase(it);
 
 	AdvancedDSTreeNode * stopNode = NULL;		// the node where the minX is in
-	X minX = determineMinWeightX(nodeP, msg._a, msg._b, stopNode);
+	X minX = determineMinWeightX(nodeP, insertedX, removedX, stopNode);
 
 	if (stopNode == nodeP)
 	{
-		if (!(minX == msg._a))
-		{
+		if (!(minX == insertedX))
+		{			
 			nodeP->removeXinWeightProcess(minX);
-			nodeP->appendXinWeightProcess(msg._a);  //couldn't find in infeasible set
+			nodeP->appendXinWeightProcess(insertedX);  //couldn't find in infeasible set
 		}
-		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == msg._a
+		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == insertedX
 	}
 	else
 	{
@@ -1148,26 +1162,22 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 		}
 
 		// add the (4, 12) back to P, consider the relation among minX, backX and insertedX
-		if (!(minX == msg._a))
+		if (!(minX == insertedX))
 		{
 			// delete minX into infeasible
 			vector<X>::iterator tmpIt = find(nodeP->_matched.begin(), nodeP->_matched.end(), minX);
 			nodeP->_matched.erase(tmpIt);
-			// add (4, 12), the inserted x which maybe transferred from a child
-
-			/*nodeP->_pESTree->appendVariable(nodeP->sizeOfY(nodeP->getESValues()[0], msg._a._end));
-			nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->getESValues()[0], msg._a._begin));
-			nodeP->_matched.push_back(msg._a);*/
-			if (backXeqInsertX == true)
+			// add (4, 12), the inserted x which maybe transferred from a child			
+			if (backXeqInsertX == true)		// if backX == insertedX, it is only added into matched set; otherwise, as well as ESTree and EETree.
 			{
-				nodeP->_matched.push_back(msg._a);
+				nodeP->_matched.push_back(insertedX);
 			}
 			else
 			{
-				nodeP->appendXinWeightProcess(msg._a);
+				nodeP->appendXinWeightProcess(insertedX);
 			}
 		}
-		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == msg._a
+		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == insertedX
 	}
 	return minX;
 }
@@ -1290,10 +1300,11 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 	return anc;
 }
 
-X AdvancedDSTree::fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, X transX)
+X AdvancedDSTree::fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg tempMsg)
 {
-
+	X transX = tempMsg._b;
 	// roll back to check
+	leaf->_parent->appendX(tempMsg);	// roll back to check
 	leaf->_parent->_pESTree->deleteVariable(leaf->sizeOfY(leaf->_values[0], addX._end));
 	leaf->_parent->_pEETree->deleteVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->sizeOfY(leaf->_values[0], addX._begin));
 

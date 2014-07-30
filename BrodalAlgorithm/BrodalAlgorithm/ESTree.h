@@ -59,6 +59,7 @@ public:
 
 	void deleteVariable(int);
 	void appendVariable(int);
+	void deleteVariable4J(int kOfX);
 
 	int getLbyK(int);
 };

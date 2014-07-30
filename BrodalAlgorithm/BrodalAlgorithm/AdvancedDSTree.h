@@ -77,7 +77,7 @@ private:
 
 	X replaceMinWeightX(AdvancedDSTreeNode*, Msg);
 
-	X fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, X removeX);
+	X fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg);
 	
 public:
 	AdvancedDSTree();
