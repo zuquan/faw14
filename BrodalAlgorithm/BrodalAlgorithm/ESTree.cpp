@@ -245,12 +245,12 @@ ESTreeNode* ESTree::locateLeafL(ESTreeNode* leafK)
 // update b_j from the leaf k to the leaf j
 void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 {
-	/*if (leafK == leafJ)
+	if (leafK == leafJ)
 	{
 		leafK->_add += diff;
 		updateMin(leafK);
 		return;
-	}*/
+	}
 
 	stack<ESTreeNode*> qk = getPathElements(leafK);
 	stack<ESTreeNode*> qj = getPathElements(leafJ);
