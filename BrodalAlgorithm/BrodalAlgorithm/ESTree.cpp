@@ -247,8 +247,8 @@ void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 {
 	if (leafK == leafJ)
 	{
-		leafK->_add += diff;
-		updateMin(leafK);
+		/*leafK->_add += diff;
+		updateMin(leafK);*/
 		return;
 	}
 

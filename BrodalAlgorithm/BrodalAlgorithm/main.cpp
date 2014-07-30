@@ -19,7 +19,7 @@ ofstream olog("replaceLogFAW.txt");
 int main()
 {
 	//open a file
-	//generator("input.txt");
+	generator("input.txt");
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
 	
@@ -163,7 +163,7 @@ int main()
 	ut = new UnitTest(allExistingX, allExistingY);
 	ut->unitTestWeightXMatchedSet(pTree);
 
-	outDebug.close();
+	//outDebug.close();
 
 	//ut->printUnitTest();
 
