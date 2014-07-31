@@ -462,7 +462,31 @@ bool AdvancedDSTree::insertX(X &x)
 				}
 				else if (tempMsg._bEmpty == true && msg._bEmpty != true)
 				{
-					leaf->_parent->removeX(msg);
+					vector<X>::iterator it = find(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), msg._b);
+					if (it != leaf->_parent->_matched2.end())
+					{
+						leaf->_parent->removeX(msg);
+						//msg do not change
+					}
+					else
+					{
+						int kOfX = leaf->_parent->sizeOfY(leaf->_parent->getESValues()[0], msg._b._begin);
+						int l = leaf->_parent->_pEETree->getLbyK(leaf->_parent->_pEETree->allLeafNum() - kOfX);
+
+						vector<X> rset;
+						sort(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), cmpXBegDec);
+						for (int i = 0; i < l; i++)
+						{
+							rset.push_back(leaf->_parent->_matched2[i]);
+						}
+
+						sort(rset.begin(), rset.end(), cmpX3);
+						X realTransX = rset[rset.size() - 1];
+						msg._b = realTransX;
+						msg._c = 1;
+						leaf->_parent->removeX(msg);
+					}
+					
 				}
 				else
 				{
@@ -1069,6 +1093,10 @@ void AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X x, ve
 
 	int kOfX = node->sizeOfY((*pEEValues)[0], x._begin);
 	int l = node->_pEETree->getLbyK(node->_pEETree->allLeafNum() - kOfX);	// m+1-k'
+	if (l > node->_matched2.size())
+	{
+		l = node->_matched2.size();
+	}
 	sort(node->_matched2.begin(), node->_matched2.end(), cmpXBegDec);
 	for (int i = 0; i < l; i++)
 	{
