@@ -470,8 +470,11 @@ bool AdvancedDSTree::insertX(X &x)
 					}
 					else
 					{
-						int kOfX = leaf->_parent->sizeOfY(leaf->_parent->getESValues()[0], msg._b._begin);
-						int l = leaf->_parent->_pEETree->getLbyK(leaf->_parent->_pEETree->allLeafNum() - kOfX);
+						int kOfX = leaf->_parent->sizeOfY(leaf->_parent->getESValues()[0], msg._a._begin);
+
+						leaf->_parent->_pEETree->deleteVariable(kOfX);
+						int l = leaf->_parent->_pEETree->get2ndLbyK(leaf->_parent->_pEETree->allLeafNum() - kOfX);
+						leaf->_parent->_pEETree->appendVariable(kOfX);
 
 						vector<X> rset;
 						sort(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), cmpXBegDec);
@@ -1408,7 +1411,7 @@ X AdvancedDSTree::fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg 
 	// find the right transfer x
 	vector<X> rset;
 	int kOfX = leaf->_parent->sizeOfY(leaf->_parent->getESValues()[0], addX._begin);
-	int l = leaf->_parent->_pEETree->getLbyK(leaf->_parent->_pEETree->allLeafNum() - kOfX);	// m+1-k'
+	int l = leaf->_parent->_pEETree->get2ndLbyK(leaf->_parent->_pEETree->allLeafNum() - kOfX);	// m+1-k'
 	sort(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), cmpXBegDec);
 	for (int i = 0; i < l; i++)
 	{
