@@ -62,5 +62,6 @@ public:
 	void deleteVariable4J(int kOfX);
 
 	int getLbyK(int);
+	int get2ndLbyK(int);
 };
 

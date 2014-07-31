@@ -308,7 +308,7 @@ void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 			anc = temp;
 
 		}
-		anc->_add += diff;
+		// anc->_add += diff; // leaf j should not be updated
 		updateMin(anc);
 	}
 }
@@ -391,6 +391,19 @@ int ESTree::getLbyK(int k)
 	ESTreeNode* leafJ = locateLeafJ(leafK);
 	int j = getIndex(leafJ);
 	return j;
+}
+
+// k is the index of leaf, return the L in the right of k, called the 2nd L
+int ESTree::get2ndLbyK(int k)
+{
+	if (k > _root->_leafNum - 1)
+	{
+		k = _root->_leafNum - 1;
+	}
+	ESTreeNode* leafK = locateLeafK(k - 1);
+	ESTreeNode* leafL = locateLeafL(leafK);
+	int l2 = getIndex(leafL);
+	return l2;
 }
 
 void ESTree::updateMin(ESTreeNode* node)

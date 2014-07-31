@@ -45,8 +45,9 @@ private:
 	
 	vector<Y> getESValues();
 
-	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, Msg, bool& backXeqInsertX);
-	vector<X> getReferenceMatchedSet(AdvancedDSTreeNode* node, X x1, X jX);
+	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, Msg, bool& backXeqInsertX, X&);
+	Y getReferenceXBeg(X);
+	vector<X> getReferenceMatchedSet2(AdvancedDSTreeNode* node, X x1, X jX);
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);

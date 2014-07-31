@@ -404,7 +404,7 @@ bool AdvancedDSTree::insertX(X &x)
 				}
 			}
 			else
-			{	
+			{
 				Msg tempMsg = leaf->_parent->insertX(msg._a);
 
 				sort(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), cmpX3);
@@ -429,8 +429,8 @@ bool AdvancedDSTree::insertX(X &x)
 				else
 				{
 					// for speical inf2Trans case in weighted matching
-					if (tempMsg._bEmpty == false && msg._bEmpty == false && msg._c == 2 && tempMsg._c == 1)	
-					{						
+					if (tempMsg._bEmpty == false && msg._bEmpty == false && msg._c == 2 && tempMsg._c == 1)
+					{
 						tempMsg._b = fixInfeasible2TransCase(leaf, msg._a, tempMsg);	// find the right x to transfer
 					}
 
@@ -1140,7 +1140,7 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 	if (stopNode == nodeP)
 	{
 		if (!(minX == insertedX))
-		{			
+		{
 			nodeP->removeXinWeightProcess(minX);
 			nodeP->appendXinWeightProcess(insertedX);  //couldn't find in infeasible set
 		}
@@ -1148,17 +1148,18 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 	}
 	else
 	{
-		// modify the stopNode		
-		stopNode->_pESTree->deleteVariable(stopNode->sizeOfY(stopNode->getESValues()[0], minX._end));
-		stopNode->_pEETree->deleteVariable(stopNode->_pEETree->allLeafNum() - stopNode->sizeOfY(stopNode->getESValues()[0], minX._begin));
-		vector<X>::iterator it1 = find(stopNode->_matched2.begin(), stopNode->_matched2.end(), minX);
-		stopNode->_matched2.erase(it1);
+		// modify the stopNode		// delete EETree and matched2 in pullBack function
+		//stopNode->_pESTree->deleteVariable(stopNode->sizeOfY(stopNode->getESValues()[0], minX._end));		
+		//stopNode->_pEETree->deleteVariable(stopNode->_pEETree->allLeafNum() - stopNode->sizeOfY(stopNode->getESValues()[0], minX._begin));
+		//vector<X>::iterator it1 = find(stopNode->_matched2.begin(), stopNode->_matched2.end(), minX);
+		//stopNode->_matched2.erase(it1);
 
 		// modify the current mediate nodes, including the stopNode
 		bool backXeqInsertX = false;
+		X toBeDelX = minX;
 		while (stopNode != nodeP)
 		{
-			stopNode = stopNode->pullBackATransferredXInWeightProcess(nodeP, minX, msg, backXeqInsertX);
+			stopNode = stopNode->pullBackATransferredXInWeightProcess(nodeP, minX, msg, backXeqInsertX, toBeDelX);
 		}
 
 		// add the (4, 12) back to P, consider the relation among minX, backX and insertedX
@@ -1174,7 +1175,14 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 			}
 			else
 			{
-				nodeP->appendXinWeightProcess(insertedX);
+				nodeP->appendXinWeightProcess(insertedX);	// add insertedX in P
+				// delete backX in P
+				nodeP->_pESTree->deleteVariable(nodeP->sizeOfY(nodeP->getESValues()[0], toBeDelX._end));
+				nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->getESValues()[0], toBeDelX._begin));
+				vector<X>::iterator it1 = find(nodeP->_matched2.begin(), nodeP->_matched2.end(), toBeDelX);
+				nodeP->_matched2.erase(it1);
+
+				//nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->getESValues()[0], toBeDelX._begin));
 			}
 		}
 		nodeP->_infeasible.push_back(minX);		// minX will be added into infeasbile nomatter minX == insertedX
@@ -1182,7 +1190,26 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 	return minX;
 }
 
-vector<X> AdvancedDSTreeNode::getReferenceMatchedSet(AdvancedDSTreeNode* node, X x1, X jX)
+// get the replaceable set in its parent
+Y AdvancedDSTreeNode::getReferenceXBeg(X toBeDelX)
+{
+	X x;
+	int kOfX = sizeOfY(this->getESValues()[0], toBeDelX._begin);
+	int l2 = _pEETree->get2ndLbyK(_pEETree->allLeafNum() - kOfX);	// m+1-k'
+
+	if (l2 == 1)
+	{
+		return this->_parent->getESValues()[0];
+	}
+	else
+	{
+		sort(_matched2.begin(), _matched2.end(), cmpXBegDec);
+		return _matched2[l2 - 1]._begin;
+	}
+}
+
+// get the replaceable set in P
+vector<X> AdvancedDSTreeNode::getReferenceMatchedSet2(AdvancedDSTreeNode* node, X x1, X jX)
 {
 	vector<X> rset;
 	sort(node->_matched2.begin(), node->_matched2.end(), cmpX3);
@@ -1207,7 +1234,7 @@ vector<X> AdvancedDSTreeNode::getReferenceMatchedSet(AdvancedDSTreeNode* node, X
 }
 
 
-AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, Msg msg, bool& backXeqInsertX)
+AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, Msg msg, bool& backXeqInsertX, X& toBeDelX)
 {
 	X insertedX = msg._a;
 	//return value
@@ -1217,36 +1244,35 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 	_matched.erase(minx);
 	_infeasible.push_back(minWeightX);
 
-	//select
-	vector<X> tm;
+	// in the EETree, get the l2, which is the a_l=l point to the right of toBeDelX
+	Y refY = getReferenceXBeg(toBeDelX);
+	// delete relevant data of toBeDelX, note: do NOT delete it in matched set since it is actually matched, except the minX.
+	_pESTree->deleteVariable(sizeOfY(getESValues()[0], toBeDelX._end));
+	_pEETree->deleteVariable(_pEETree->allLeafNum() - sizeOfY(getESValues()[0], toBeDelX._begin));
+	vector<X>::iterator it1 = find(_matched2.begin(), _matched2.end(), toBeDelX);
+	_matched2.erase(it1);
 
-	//tm.push_back(insertedX);
+	// find the backX
 	vector<X> baseofPullBack;
-	baseofPullBack = getReferenceMatchedSet(infeasibleNode, insertedX, msg._b);
-
-	/*for (int i = 0; i < infeasibleNode->_matched.size(); i++)
+	AdvancedDSTreeNode * tmpNode = this;
+	while (baseofPullBack.empty() == true && tmpNode != infeasibleNode)
 	{
-	baseofPullBack.push_back(infeasibleNode->_matched[i]);
-	}*/
-	//	baseofPullBack.push_back(insertedX);
-
-	for (unsigned int i = 0; i < _transferred.size(); i++)
-	{
-		X curX = _transferred[i];
-		if (find(baseofPullBack.begin(), baseofPullBack.end(), curX) != baseofPullBack.end())
-			//if (find(infeasibleNode->_matched.begin(), infeasibleNode->_matched.end(), curX) != infeasibleNode->_matched.end())
-			//|| find(_parent->_transferred.begin(), _parent->_transferred.end(), curX) != _parent->_transferred.end())
-			//if (find(_parent->_infeasible.begin(), _parent->_infeasible.end(), curX) == _parent->_infeasible.end())
+		sort(tmpNode->_parent->_matched2.begin(), tmpNode->_parent->_matched2.end(), cmpXBegInc);
+		int tmpIndex = 0;
+		while (tmpIndex < tmpNode->_parent->_matched2.size() && tmpNode->_parent->_matched2[tmpIndex]._begin < refY)
 		{
-			//finally matched
-			tm.push_back(curX);
+			baseofPullBack.push_back(tmpNode->_parent->_matched2[tmpIndex]);
+			tmpIndex++;
 		}
+		tmpNode = tmpNode->_parent;
 	}
-	X backX;
-
-	// sort(tm.begin(), tm.end(), cmpX3);		// for now, take back the x with min(END)
-	sort(tm.begin(), tm.end(), cmpXBegInc);		// for now, take back the x with min(END)
-	backX = tm[0];
+	if (tmpNode == infeasibleNode && insertedX._begin < refY)
+	{
+		baseofPullBack.push_back(insertedX);
+	}
+	sort(baseofPullBack.begin(), baseofPullBack.end(), cmpX3);		// for now, take back the x with min(END)
+	X backX = baseofPullBack[0];
+	toBeDelX = backX;
 
 	//add backX into current Node
 	vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), backX);
@@ -1282,10 +1308,10 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 			//backX may be the inserted x, which is not in the matched set
 			if (!(backX == insertedX))
 			{
-				vector<X>::iterator it2 = find(curNode->_matched2.begin(), curNode->_matched2.end(), backX);
+				/*vector<X>::iterator it2 = find(curNode->_matched2.begin(), curNode->_matched2.end(), backX);
 				curNode->_matched2.erase(it2);
 				curNode->_pESTree->deleteVariable(sizeOfY(curNode->getESValues()[0], backX._end));
-				curNode->_pEETree->deleteVariable(curNode->_pEETree->allLeafNum() - sizeOfY(curNode->getESValues()[0], backX._begin));
+				curNode->_pEETree->deleteVariable(curNode->_pEETree->allLeafNum() - sizeOfY(curNode->getESValues()[0], backX._begin));*/
 				backXeqInsertX = false;
 			}
 			else

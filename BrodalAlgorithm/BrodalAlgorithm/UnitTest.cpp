@@ -273,12 +273,16 @@ void generator(char* fileName)
 
 }
 
-void UnitTest::printRootESTree(AdvancedDSTree * tree)
+void UnitTest::printRootESTree(AdvancedDSTree * dt)
 {
-	//outDebug << "ESTree " << endl;
-	verifiyESTree(tree->_root->_pESTree->_root);	
-	//outDebug << "EETree " << endl;
-	//verifiyESTree(tree->_root->_pEETree->_root);
+	AdvancedDSTreeNode* node = dt->_root;
+	if (node != NULL)
+	{
+		//outDebug << "ESTree " << endl;
+		verifiyESTree(node->_pESTree->_root);
+		//outDebug << "EETree " << endl;
+		//verifiyESTree(node->_pEETree->_root);
+	}	
 }
 
 void UnitTest::verifiyESTree(ESTreeNode* node)
