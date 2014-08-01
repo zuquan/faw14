@@ -48,6 +48,10 @@ private:
 	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, Msg, bool& backXeqInsertX, X&);
 	Y getReferenceXBeg(X);
 	vector<X> getReferenceMatchedSet2(AdvancedDSTreeNode* node, X x1, X jX);
+
+	void undoESInsert(Msg m);
+	vector<X> getReplaceableSetByEETree(X x);
+	vector<X> getReplaceableSetByESTree(X x);
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
@@ -78,7 +82,7 @@ private:
 
 	X replaceMinWeightX(AdvancedDSTreeNode*, Msg);
 
-	X fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg);
+	Msg fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg);
 	
 public:
 	AdvancedDSTree();

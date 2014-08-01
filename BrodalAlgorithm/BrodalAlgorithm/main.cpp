@@ -77,7 +77,7 @@ int main()
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
 
-				  if (x._id == 6)
+				  if (x._id == 8)
 				  {
 					  int a = 0;
 				  }				  
