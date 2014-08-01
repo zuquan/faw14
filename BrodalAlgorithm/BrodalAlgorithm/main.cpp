@@ -76,13 +76,13 @@ int main()
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
 
-				  if (x._id == 6)
+				  if (x._id == 8)
 				  {
 					  int a = 0;
 				  }				  
 				  pTree->insertX(x);
-				  outDebug << "x: " << x._id << '\t' << x._begin << '\t' << x._end << '\t' << x._w << endl;
-				  ut->printRootESTree(debugTree);
+				  /*outDebug << "x: " << x._id << '\t' << x._begin << '\t' << x._end << '\t' << x._w << endl;
+				  ut->printRootESTree(debugTree);*/
 				  int a = 0;
 				  
 		}break;
