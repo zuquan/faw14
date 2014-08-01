@@ -501,7 +501,7 @@ bool AdvancedDSTree::insertX(X &x)
 							leaf->_parent->_pESTree->appendVariable(leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._end));
 							leaf->_parent->_pEETree->appendVariable(
 								leaf->_parent->_pEETree->allLeafNum() -
-								leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._b._begin));
+								leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._begin));
 							leaf->_parent->_matched.push_back(msg._a);
 							leaf->_parent->_matched2.push_back(msg._a);
 							//delete b
@@ -1526,11 +1526,7 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 	_infeasible.push_back(minWeightX);
 
 	// in the EETree, get the l2, which is the a_l=l point to the right of toBeDelX
-	if (toBeDelX._id == 180)
-	{
-		int a = 0;
-	}
-
+	
 	Y refY = getReferenceXBeg(toBeDelX);
 	
 	// delete relevant data of toBeDelX, note: do NOT delete it in matched set since it is actually matched, except the minX.

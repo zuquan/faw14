@@ -185,13 +185,13 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 void generator(char* fileName)
 {
 
-	int range = 5;	
-	int xnum = 10;
-	int maxw = 20;
+	/*int range = 6;	
+	int xnum = 18;
+	int maxw = 20;*/
 
-	/*int range = 80;
+	int range = 80;
 	int xnum = 400;
-	int maxw = 1000;*/
+	int maxw = 1000;
 	
 	/*cout << "input range of Y" << endl;
 	int range;
