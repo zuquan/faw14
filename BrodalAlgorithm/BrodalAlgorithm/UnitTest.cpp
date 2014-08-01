@@ -189,11 +189,11 @@ void generator(char* fileName)
 	int xnum = 18;
 	int maxw = 20;*/
 
-	int range = 80;
+	/*int range = 80;
 	int xnum = 400;
-	int maxw = 1000;
+	int maxw = 1000;*/
 	
-	/*cout << "input range of Y" << endl;
+	cout << "input range of Y" << endl;
 	int range;
 	cin >> range;
 	int xnum;
@@ -201,7 +201,7 @@ void generator(char* fileName)
 	cin >> xnum;
 	int maxw;
 	cout << "input the max weight" << endl;
-	cin >> maxw;*/
+	cin >> maxw;
 	
 	ofstream of(fileName);
 
@@ -220,14 +220,14 @@ void generator(char* fileName)
 
 	/*SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);*/
-	/*int seed;
+	int seed;
 	cout << "input seed of rand" << endl;
 	cin >> seed;
-	srand(seed);*/
+	srand(seed);
 
-	SYSTEMTIME lpsystime;
+	/*SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
-	srand(lpsystime.wMinute*1000 + lpsystime.wMilliseconds);
+	srand(lpsystime.wMinute*1000 + lpsystime.wMilliseconds);*/
 
 	for (int i = 1; i <= xnum; i++)
 	{
@@ -308,7 +308,7 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 
 	while (queue.empty() == false)
 	{
-		outDebug << "level " << level++ << ": ";
+//		outDebug << "level " << level++ << ": ";
 		int size = queue.size();
 		for (int i = 0; i < size; i++)
 		{

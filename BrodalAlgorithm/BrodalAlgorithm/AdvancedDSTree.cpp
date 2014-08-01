@@ -4,9 +4,9 @@
 #include"UnitTest.h"
 
 extern vector<Y> allExistingY;
-extern UnitTest * ut;
+//extern UnitTest * ut;
 extern ofstream olog;
-extern AdvancedDSTree* debugTree;
+//extern AdvancedDSTree* debugTree;
 
 bool cmpY(Y y1, Y y2)
 {
@@ -245,15 +245,15 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 			node->_matched.erase(it);
 			Msg tmpMsg = node->insertX(msg._b);
 			//no infeasible or transferred case
-			if (tmpMsg._c == 2 || tmpMsg._c == 1)
-			{
-				vector<X> t; t.erase(t.begin());	// for debug
-			}
+			//if (tmpMsg._c == 2 || tmpMsg._c == 1)
+			//{
+			//	vector<X> t; t.erase(t.begin());	// for debug
+			//}
 		}break;
 		case 2:	
 		{
 			//no infeasible case
-			vector<X> t; t.erase(t.begin());	// for debug
+			//vector<X> t; t.erase(t.begin());	// for debug
 		}break;
 		}
 	}
@@ -1077,10 +1077,10 @@ void AdvancedDSTreeNode::queryUpdateNodeW()
 
 	for (itUpdateList = update.begin(); itUpdateList != update.end(); itUpdateList++)
 	{
-		if ((*itUpdateList)._id == 12)
+		/*if ((*itUpdateList)._id == 12)
 		{
 			int ad = 0;
-		}
+		}*/
 		vector<X>::iterator itMatching = find(_matching.begin(), _matching.end(), *itUpdateList);
 		if (itMatching != _matching.end())	// in matching
 		{
