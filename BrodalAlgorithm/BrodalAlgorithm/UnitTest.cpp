@@ -185,9 +185,10 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 void generator(char* fileName)
 {
 
-	/*int range = 50;	
-	int xnum = 100;
-	int maxw = 200;*/
+	
+	/*int range = 80;
+	int xnum = 400;
+	int maxw = 1000;*/
 
 	
 	cout << "input range of Y" << endl;
@@ -217,14 +218,14 @@ void generator(char* fileName)
 
 	/*SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);*/
-	/*int seed;
+	int seed;
 	cout << "input seed of rand" << endl;
 	cin >> seed;
-	srand(seed);*/
+	srand(seed);
 
-	SYSTEMTIME lpsystime;
+	/*SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
-	srand(lpsystime.wMinute*1000 + lpsystime.wMilliseconds);
+	srand(lpsystime.wMinute*1000 + lpsystime.wMilliseconds);*/
 
 	for (int i = 1; i <= xnum; i++)
 	{
@@ -305,7 +306,7 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 
 	while (queue.empty() == false)
 	{
-		outDebug << "level " << level++ << ": ";
+//		outDebug << "level " << level++ << ": ";
 		int size = queue.size();
 		for (int i = 0; i < size; i++)
 		{
