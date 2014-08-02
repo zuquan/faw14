@@ -391,7 +391,6 @@ bool AdvancedDSTree::insertX(X &x)
 	if (msg._c == 2)
 	{
 		msg._b = replaceMinWeightX(leaf, msg);		// call replaceable algorithm
-		int a = 0;
 	}
 
 	while (leaf->_parent != NULL)	//send msg until the root, the msg is from a node to its parent
@@ -429,8 +428,164 @@ bool AdvancedDSTree::insertX(X &x)
 		}
 		else // the current node is the right child
 		{
+//new version==========================================
+			if (msg._bEmpty == false) //fail in right child: infeasible or transferred
+			{
+				if (!(msg._a == msg._b))//not kick itself in weight 
+				{
+					vector<X>::iterator it = find(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), msg._b);
+					if (it != leaf->_parent->_matched2.end())//find b in parent's matched2
+					{
+						if (msg._c == 2)
+						{
+							//insert a
+							leaf->_parent->_pESTree->appendVariable(leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._end));
+							leaf->_parent->_pEETree->appendVariable(
+								leaf->_parent->_pEETree->allLeafNum() -
+								leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._begin));
+							leaf->_parent->_matched.push_back(msg._a);
+							leaf->_parent->_matched2.push_back(msg._a);
+							//delete b
+							leaf->_parent->removeX(msg);
+						}
+						else//transferred in right child
+						{
+							vector<X> r;
+							r = leaf->_parent->getReplaceableSetByEETree(msg._a);
+							sort(r.begin(), r.end(), cmpX3);
+							X preemptedX = r[r.size() - 1];
+							if (preemptedX._end <= leaf->_parent->_values[leaf->_parent->_values.size() - 1])
+							{
+								vector<X> t; t.erase(t.begin());
+							}
+							msg._b = preemptedX;
+							//insert a
+							leaf->_parent->_pESTree->appendVariable(leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._end));
+							leaf->_parent->_pEETree->appendVariable(
+								leaf->_parent->_pEETree->allLeafNum() -
+								leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._begin));
+							leaf->_parent->_matched.push_back(msg._a);
+							leaf->_parent->_matched2.push_back(msg._a);
+							//delete preemptedX
+							leaf->_parent->removeX(msg);
+						}
+						
+					}
+					else
+					{
+						//b is replaced
+						Msg tempMsg = leaf->_parent->insertX(msg._a);
+						//undo insert, get the result of the insert
+						leaf->_parent->undoESInsert(tempMsg);
+
+						vector<X> r;
+
+						if (tempMsg._c == 0 || tempMsg._c == 1)//success or transferred in parent
+						{
+							r = leaf->_parent->getReplaceableSetByEETree(tempMsg._a);
+
+						}
+						else//infeasible in parent
+						{
+							r = leaf->_parent->getReplaceableSetByESTree(tempMsg._a);
+						}
+						sort(r.begin(), r.end(), cmpX3);
+						X preemptedX = r[r.size() - 1];
+						if (preemptedX._end <= leaf->_parent->_values[leaf->_parent->_values.size() - 1])
+						{
+							tempMsg._bEmpty = false;
+							tempMsg._b = preemptedX;
+							tempMsg._c = 2;
+
+							//insert a
+							leaf->_parent->_pESTree->appendVariable(leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._end));
+							leaf->_parent->_pEETree->appendVariable(
+								leaf->_parent->_pEETree->allLeafNum() -
+								leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._begin));
+							leaf->_parent->_matched.push_back(msg._a);
+							leaf->_parent->_matched2.push_back(msg._a);
+							//delete b
+							leaf->_parent->removeX(tempMsg);
+
+							msg._b = replaceMinWeightX(leaf->_parent, tempMsg);
+							msg._bEmpty = false;
+							msg._c = 2;
+						}
+						else
+						{
+							msg._b = preemptedX;//transferred
+							msg._bEmpty = false;
+							msg._c = 1;
+							if (preemptedX == msg._a)
+							{
+								leaf->_parent->_transferred.push_back(msg._a);
+							}
+							else
+							{
+								leaf->_parent->removeX(msg);	// remove the realTransX in parent
+								leaf->_parent->_pESTree->appendVariable(leaf->sizeOfY(leaf->_values[0], msg._a._end));
+								leaf->_parent->_pEETree->appendVariable(leaf->_parent->_pEETree->allLeafNum()
+									- leaf->sizeOfY(leaf->_values[0], msg._a._begin));
+								leaf->_parent->_matched.push_back(msg._a);
+								leaf->_parent->_matched2.push_back(msg._a);
+							}
+							
+						}
+					}
+				}
+				else//kick it self in weight case(infeasible) or brodal case(transferred)
+				{
+					if (msg._c == 2)
+					{
+						leaf->_parent->_infeasible.push_back(msg._a);
+					}
+					else// transferred itself in right child
+					{
+						vector<X> r;
+						r = leaf->_parent->getReplaceableSetByEETree(msg._a);
+						sort(r.begin(), r.end(), cmpX3);
+						X preemptedX = r[r.size() - 1];
+						if (preemptedX._end <= leaf->_parent->_values[leaf->_parent->_values.size() - 1])
+						{
+							vector<X> t; t.erase(t.begin());
+						}
+						msg._b = preemptedX;
+						//insert a
+						leaf->_parent->_pESTree->appendVariable(leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._end));
+						leaf->_parent->_pEETree->appendVariable(
+							leaf->_parent->_pEETree->allLeafNum() -
+							leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._begin));
+						leaf->_parent->_matched.push_back(msg._a);
+						leaf->_parent->_matched2.push_back(msg._a);
+						//delete preemptedX
+						leaf->_parent->removeX(msg);
+					}
+					
+				}
+				
+			}
+			else//success in right child
+			{
+				Msg tempMsg = leaf->_parent->insertX(msg._a);
+				if (tempMsg._c == 2)
+				{
+					msg._b = replaceMinWeightX(leaf->_parent, tempMsg);
+					msg._bEmpty = false;
+					msg._c = 2;
+				}
+				else
+				{
+					msg._b = tempMsg._b;
+					msg._bEmpty = tempMsg._bEmpty;
+					msg._c = tempMsg._c;
+				}
+			}
+
+
+//=====================================
+			//old version
 			//if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a && msg._c == 2)	//Fail in R
-			if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a)	//Fail in R
+			/*if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a)	//Fail in R
 			{
 				if (msg._c == 1)
 				{
@@ -462,29 +617,59 @@ bool AdvancedDSTree::insertX(X &x)
 				}
 				else if (tempMsg._bEmpty == true && msg._bEmpty != true)
 				{
-					leaf->_parent->removeX(msg);
+					vector<X>::iterator it = find(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), msg._b);
+					if (it != leaf->_parent->_matched2.end())
+					{
+						leaf->_parent->removeX(msg);
+						//msg do not change
+					}
+					else
+					{
+						int kOfX = leaf->_parent->sizeOfY(leaf->_parent->getESValues()[0], msg._a._begin);
+
+						leaf->_parent->_pEETree->deleteVariable(kOfX);
+						int l = leaf->_parent->_pEETree->get2ndLbyK(leaf->_parent->_pEETree->allLeafNum() - kOfX);
+						leaf->_parent->_pEETree->appendVariable(kOfX);
+
+						vector<X> rset;
+						sort(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), cmpXBegDec);
+						for (int i = 0; i < l; i++)
+						{
+							rset.push_back(leaf->_parent->_matched2[i]);
+						}
+
+						sort(rset.begin(), rset.end(), cmpX3);
+						X realTransX = rset[rset.size() - 1];
+						msg._b = realTransX;
+						msg._c = 1;
+						leaf->_parent->removeX(msg);
+					}
+					
 				}
 				else
 				{
 					// for speical inf2Trans case in weighted matching
 					if (tempMsg._bEmpty == false && msg._bEmpty == false && msg._c == 2 && tempMsg._c == 1)
 					{
-						tempMsg._b = fixInfeasible2TransCase(leaf, msg._a, tempMsg);	// find the right x to transfer
+						msg = fixInfeasible2TransCase(leaf, msg._a, tempMsg);	// find the right x to transfer
 					}
-
-					bool equalB = (msg._b == tempMsg._b);
-					msg._b = tempMsg._b;
-					msg._bEmpty = tempMsg._bEmpty;
-					msg._c = tempMsg._c;
-
-					if (tempMsg._c == 2 && equalB == false)
+					else
 					{
-						msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replaceable algorithm		
-						int a = 0;
+						bool equalB = (msg._b == tempMsg._b);
+						msg._b = tempMsg._b;
+						msg._bEmpty = tempMsg._bEmpty;
+						msg._c = tempMsg._c;
+
+						if (tempMsg._c == 2 && equalB == false)
+						{
+							msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replaceable algorithm		
+							int a = 0;
+						}
 					}
 				}
 
-			}
+			}*/
+			//========================================
 		}
 		leaf = leaf->_parent;
 	}
@@ -555,6 +740,52 @@ void AdvancedDSTreeNode::removeXinWeightProcess(X x)
 	_matched2.erase(it1);	// delete b in the matched2 set of parent
 }
 
+void AdvancedDSTreeNode::undoESInsert(Msg m)
+{
+	if (m._c != 0 && m._a == m._b)
+	{
+		if (m._c == 1)
+		{
+			vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), m._b);
+			_transferred.erase(it);
+		}
+		else if (m._c == 2)
+		{
+			vector<X>::iterator it = find(_infeasible.begin(), _infeasible.end(), m._b);
+			_infeasible.erase(it);
+		}
+		return;
+	}
+	//else: a is inserted and b is removed maybe
+	if (m._aEmpty == false)//in case of deletion in BrodalProcess
+	{
+		//delete a
+		vector<X>::iterator it = find(_matched.begin(), _matched.end(), m._a);
+		_matched.erase(it);	// delete a in the matched set of parent
+		vector<X>::iterator it1 = find(_matched2.begin(), _matched2.end(), m._a);
+		_matched2.erase(it1);	// delete a in the matched2 set of parent
+		_pESTree->deleteVariable(sizeOfY(getESValues()[0], m._a._end));
+		_pEETree->deleteVariable(_pEETree->allLeafNum() - sizeOfY(getESValues()[0], m._a._begin));
+	}
+	if (m._bEmpty == false)//not success then
+	{
+		if (m._c == 1)
+		{
+			vector<X>::iterator it = find(_transferred.begin(), _transferred.end(), m._b);
+			_transferred.erase(it);	
+		}
+		else if (m._c == 2)
+		{
+			vector<X>::iterator it = find(_infeasible.begin(), _infeasible.end(), m._b);
+			_infeasible.erase(it);	
+		}
+		_matched.push_back(m._b);
+		_matched2.push_back(m._b);
+		_pESTree->appendVariable(sizeOfY(getESValues()[0], m._b._end));
+		_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(getESValues()[0], m._b._begin));
+	}
+}
+
 void AdvancedDSTreeNode::appendX(Msg m)
 {
 
@@ -591,6 +822,7 @@ void AdvancedDSTreeNode::appendXinWeightProcess(X x)
 	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], x._begin));
 	_matched.push_back(x);
 	_matched2.push_back(x);
+	
 }
 
 
@@ -1069,6 +1301,10 @@ void AdvancedDSTree::repalceableSetOfLeftChild(AdvancedDSTreeNode* node, X x, ve
 
 	int kOfX = node->sizeOfY((*pEEValues)[0], x._begin);
 	int l = node->_pEETree->getLbyK(node->_pEETree->allLeafNum() - kOfX);	// m+1-k'
+	if (l > node->_matched2.size())
+	{
+		l = node->_matched2.size();
+	}
 	sort(node->_matched2.begin(), node->_matched2.end(), cmpXBegDec);
 	for (int i = 0; i < l; i++)
 	{
@@ -1219,7 +1455,6 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 				nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->getESValues()[0], toBeDelX._begin));
 				vector<X>::iterator it1 = find(nodeP->_matched2.begin(), nodeP->_matched2.end(), toBeDelX);
 				nodeP->_matched2.erase(it1);
-
 				//nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->getESValues()[0], toBeDelX._begin));
 			}
 		}
@@ -1235,14 +1470,23 @@ Y AdvancedDSTreeNode::getReferenceXBeg(X toBeDelX)
 	int kOfX = sizeOfY(this->getESValues()[0], toBeDelX._begin);
 	int l2 = _pEETree->get2ndLbyK(_pEETree->allLeafNum() - kOfX);	// m+1-k'
 
-	if (l2 == 1)
+	if (l2 == 0)
 	{
 		return this->_parent->getESValues()[0];
 	}
 	else
 	{
 		sort(_matched2.begin(), _matched2.end(), cmpXBegDec);
-		return _matched2[l2 - 1]._begin;
+		Y ref = _matched2[l2 - 1]._begin;
+		if (ref == toBeDelX._begin)
+		{
+			return this->_parent->getESValues()[0];
+		}
+		else
+		{
+			return ref;
+		}
+		
 	}
 }
 
@@ -1277,13 +1521,14 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 	X insertedX = msg._a;
 	//return value
 	AdvancedDSTreeNode* anc;
-	// //for the first time, remember removeX minx from ESTreeEETree
 	vector<X>::iterator minx = find(_matched.begin(), _matched.end(), minWeightX);
 	_matched.erase(minx);
 	_infeasible.push_back(minWeightX);
 
 	// in the EETree, get the l2, which is the a_l=l point to the right of toBeDelX
+	
 	Y refY = getReferenceXBeg(toBeDelX);
+	
 	// delete relevant data of toBeDelX, note: do NOT delete it in matched set since it is actually matched, except the minX.
 	_pESTree->deleteVariable(sizeOfY(getESValues()[0], toBeDelX._end));
 	_pEETree->deleteVariable(_pEETree->allLeafNum() - sizeOfY(getESValues()[0], toBeDelX._begin));
@@ -1293,14 +1538,24 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 	// find the backX
 	vector<X> baseofPullBack;
 	AdvancedDSTreeNode * tmpNode = this;
-	while (baseofPullBack.empty() == true && tmpNode != infeasibleNode)
+	tmpNode = tmpNode->_parent;
+	//while (baseofPullBack.empty() == true && tmpNode != infeasibleNode)
+	while (true)
 	{
-		sort(tmpNode->_parent->_matched2.begin(), tmpNode->_parent->_matched2.end(), cmpXBegInc);
+		sort(tmpNode->_matched2.begin(), tmpNode->_matched2.end(), cmpXBegInc);
 		int tmpIndex = 0;
-		while (tmpIndex < tmpNode->_parent->_matched2.size() && tmpNode->_parent->_matched2[tmpIndex]._begin < refY)
+		while (tmpIndex < tmpNode->_matched2.size() && tmpNode->_matched2[tmpIndex]._begin < refY)
 		{
-			baseofPullBack.push_back(tmpNode->_parent->_matched2[tmpIndex]);
+			baseofPullBack.push_back(tmpNode->_matched2[tmpIndex]);
 			tmpIndex++;
+		}
+		if (tmpNode == infeasibleNode)
+		{
+			break;
+		}
+		if (baseofPullBack.empty() == false)
+		{
+			break;
 		}
 		tmpNode = tmpNode->_parent;
 	}
@@ -1364,23 +1619,25 @@ AdvancedDSTreeNode* AdvancedDSTreeNode::pullBackATransferredXInWeightProcess(Adv
 	return anc;
 }
 
-X AdvancedDSTree::fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg tempMsg)
+Msg AdvancedDSTree::fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg tempMsg)
 {
+	Msg returnMsg;
 	X transX = tempMsg._b;
 	// roll back to check
-	leaf->_parent->appendX(tempMsg);	// roll back to check
+	leaf->_parent->appendX(tempMsg);	// roll back to check //add tempMsg.b back
+
+	//remove tempMsg.a
 	leaf->_parent->_pESTree->deleteVariable(leaf->sizeOfY(leaf->_values[0], addX._end));
 	leaf->_parent->_pEETree->deleteVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->sizeOfY(leaf->_values[0], addX._begin));
-
 	vector<X>::iterator it = find(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), addX);
-	leaf->_parent->_matched.erase(it);	// delete b in the matched set of parent
+	leaf->_parent->_matched.erase(it);	
 	vector<X>::iterator it1 = find(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), addX);
-	leaf->_parent->_matched2.erase(it1);	// delete b in the matched2 set of parent
+	leaf->_parent->_matched2.erase(it1);	
 
 	// find the right transfer x
 	vector<X> rset;
 	int kOfX = leaf->_parent->sizeOfY(leaf->_parent->getESValues()[0], addX._begin);
-	int l = leaf->_parent->_pEETree->getLbyK(leaf->_parent->_pEETree->allLeafNum() - kOfX);	// m+1-k'
+	int l = leaf->_parent->_pEETree->get2ndLbyK(leaf->_parent->_pEETree->allLeafNum() - kOfX);	// m+1-k'
 	sort(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), cmpXBegDec);
 	for (int i = 0; i < l; i++)
 	{
@@ -1392,27 +1649,85 @@ X AdvancedDSTree::fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg 
 	if (find(rset.begin(), rset.end(), transX) != rset.end())
 	{
 		realTransX = transX;
+		returnMsg = tempMsg;
 	}
 	else
 	{
 		realTransX = rset[rset.size() - 1];
 		if (realTransX._end <= leaf->_parent->_values[leaf->_parent->_values.size() - 1])
 		{
-			vector<X> t;
-			t.erase(t.begin());	// will crash here
+			//add a in and put realTransX into infeasible, then replace min
+			leaf->_parent->_pESTree->appendVariable(leaf->sizeOfY(leaf->_values[0], addX._end));
+			leaf->_parent->_pEETree->appendVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->sizeOfY(leaf->_values[0], addX._begin));
+			leaf->_parent->_matched.push_back(addX);
+			leaf->_parent->_matched2.push_back(addX);
+			Msg createMsg;
+			createMsg._a = tempMsg._a;
+			createMsg._aEmpty = false;
+			createMsg._b = realTransX;
+			createMsg._bEmpty = false;
+			createMsg._c = 2;
+			leaf->_parent->removeX(createMsg);	// remove the realTransX in parent
+			returnMsg._b = replaceMinWeightX(leaf->_parent, createMsg);
+			returnMsg._c = 2;
+		}
+		else
+		{
+			returnMsg._a = tempMsg._a;
+			returnMsg._aEmpty = false;
+			returnMsg._b = realTransX;
+			returnMsg._bEmpty = false;
+			returnMsg._c = 1;
+			leaf->_parent->removeX(returnMsg);	// remove the realTransX in parent
+			leaf->_parent->_pESTree->appendVariable(leaf->sizeOfY(leaf->_values[0], addX._end));
+			leaf->_parent->_pEETree->appendVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->sizeOfY(leaf->_values[0], addX._begin));
+			leaf->_parent->_matched.push_back(addX);
+			leaf->_parent->_matched2.push_back(addX);
+			
 		}
 	}
 
 	// roll in
-	Msg m;
-	m._b = realTransX;
-	m._c = 1;
+	
 
-	leaf->_parent->removeX(m);	// remove the realTransX in parent
-	leaf->_parent->_pESTree->appendVariable(leaf->sizeOfY(leaf->_values[0], addX._end));
-	leaf->_parent->_pEETree->appendVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->sizeOfY(leaf->_values[0], addX._begin));
-	leaf->_parent->_matched.push_back(addX);
-	leaf->_parent->_matched2.push_back(addX);
+	
 
-	return realTransX;
+	return returnMsg;
+}
+
+
+vector<X> AdvancedDSTreeNode::getReplaceableSetByEETree(X x)
+{
+	int kOfX = sizeOfY(getESValues()[0], x._begin);
+	int l = _pEETree->getLbyK(_pEETree->allLeafNum() - kOfX);
+	vector<X> rset;
+	sort(_matched2.begin(), _matched2.end(), cmpXBegDec);
+	if (l > _matched2.size())
+	{
+		l = _matched2.size();
+	}
+	for (int i = 0; i < l; i++)
+	{
+		rset.push_back(_matched2[i]);
+	}
+	rset.push_back(x);
+	return rset;
+}
+
+vector<X> AdvancedDSTreeNode::getReplaceableSetByESTree(X x)
+{
+	int kOfX = sizeOfY(getESValues()[0], x._end);
+	int j = _pESTree->getLbyK(kOfX);
+	vector<X> rset;
+	sort(_matched2.begin(), _matched2.end(), cmpX3);
+	if (j > _matched2.size())
+	{
+		j = _matched2.size();
+	}
+	for (int i = 0; i < j; i++)
+	{
+		rset.push_back(_matched2[i]);
+	}
+	rset.push_back(x);
+	return rset;
 }

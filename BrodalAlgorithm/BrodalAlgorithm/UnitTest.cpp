@@ -184,11 +184,13 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 
 void generator(char* fileName)
 {
-	int range = 5;	
-	int xnum = 10;
-	int maxw = 100;
+
+	/*int range = 50;	
+	int xnum = 100;
+	int maxw = 200;*/
+
 	
-	/*cout << "input range of Y" << endl;
+	cout << "input range of Y" << endl;
 	int range;
 	cin >> range;
 	int xnum;
@@ -196,7 +198,7 @@ void generator(char* fileName)
 	cin >> xnum;
 	int maxw;
 	cout << "input the max weight" << endl;
-	cin >> maxw;*/
+	cin >> maxw;
 	
 	ofstream of(fileName);
 

@@ -1,5 +1,6 @@
 #include<iostream>
 #include<fstream>
+#include<windows.h>
 
 #include"AdvancedDSTree.h"
 #include"UnitTest.h"
@@ -19,7 +20,7 @@ ofstream olog("replaceLogFAW.txt");
 int main()
 {
 	//open a file
-	//generator("input.txt");
+	generator("input.txt");
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
 	
@@ -159,6 +160,8 @@ int main()
 	//pTree->unitTestDS("DSTREE");	// unit test
 	cout << "end" << endl;
 	olog.close();
+
+	//system("LWCBGNew.exe");
 
 	ut = new UnitTest(allExistingX, allExistingY);
 	ut->unitTestWeightXMatchedSet(pTree);
