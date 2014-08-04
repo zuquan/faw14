@@ -431,12 +431,12 @@ bool AdvancedDSTree::insertX(X &x)
 //new version==========================================
 			if (msg._bEmpty == false) //fail in right child: infeasible or transferred
 			{
-				if (!(msg._a == msg._b))//not kick itself in weight 
+				if (!(msg._a == msg._b)) //not kick itself in weight 
 				{
 					vector<X>::iterator it = find(leaf->_parent->_matched2.begin(), leaf->_parent->_matched2.end(), msg._b);
-					if (it != leaf->_parent->_matched2.end())//find b in parent's matched2
+					if (it != leaf->_parent->_matched2.end()) //find b in parent's matched2
 					{
-						if (msg._c == 2)
+						if (msg._c == 2)	// inf. case, replace b in P
 						{
 							//insert a
 							leaf->_parent->_pESTree->appendVariable(leaf->_parent->sizeOfY(leaf->_parent->_rightChild->_values[0], msg._a._end));
@@ -448,7 +448,7 @@ bool AdvancedDSTree::insertX(X &x)
 							//delete b
 							leaf->_parent->removeX(msg);
 						}
-						else//transferred in right child
+						else //transferred in right child, using P.EETree to get b'
 						{
 							vector<X> r;
 							r = leaf->_parent->getReplaceableSetByEETree(msg._a);
@@ -478,20 +478,19 @@ bool AdvancedDSTree::insertX(X &x)
 						//undo insert, get the result of the insert
 						leaf->_parent->undoESInsert(tempMsg);
 
-						vector<X> r;
-
-						if (tempMsg._c == 0 || tempMsg._c == 1)//success or transferred in parent
+						vector<X> r;	// reference set to see whether inf. or tran.
+						if (tempMsg._c == 0 || tempMsg._c == 1) //success or transferred in parent
 						{
 							r = leaf->_parent->getReplaceableSetByEETree(tempMsg._a);
-
 						}
-						else//infeasible in parent
+						else //infeasible in parent
 						{
 							r = leaf->_parent->getReplaceableSetByESTree(tempMsg._a);
 						}
 						sort(r.begin(), r.end(), cmpX3);
 						X preemptedX = r[r.size() - 1];
-						if (preemptedX._end <= leaf->_parent->_values[leaf->_parent->_values.size() - 1])
+
+						if (preemptedX._end <= leaf->_parent->_values[leaf->_parent->_values.size() - 1]) // inf.
 						{
 							tempMsg._bEmpty = false;
 							tempMsg._b = preemptedX;
@@ -507,13 +506,13 @@ bool AdvancedDSTree::insertX(X &x)
 							//delete b
 							leaf->_parent->removeX(tempMsg);
 
-							msg._b = replaceMinWeightX(leaf->_parent, tempMsg);
+							msg._b = replaceMinWeightX(leaf->_parent, tempMsg);	// W-alg. for inf.
 							msg._bEmpty = false;
 							msg._c = 2;
 						}
-						else
+						else // tran., manually update P 
 						{
-							msg._b = preemptedX;//transferred
+							msg._b = preemptedX; //transferred
 							msg._bEmpty = false;
 							msg._c = 1;
 							if (preemptedX == msg._a)
@@ -533,13 +532,13 @@ bool AdvancedDSTree::insertX(X &x)
 						}
 					}
 				}
-				else//kick it self in weight case(infeasible) or brodal case(transferred)
+				else //kick it self in weight case(infeasible) or brodal case(transferred)
 				{
 					if (msg._c == 2)
 					{
 						leaf->_parent->_infeasible.push_back(msg._a);
 					}
-					else// transferred itself in right child
+					else // transferred itself in right child, using P.EETree to get b'
 					{
 						vector<X> r;
 						r = leaf->_parent->getReplaceableSetByEETree(msg._a);
@@ -564,7 +563,7 @@ bool AdvancedDSTree::insertX(X &x)
 				}
 				
 			}
-			else//success in right child
+			else //success in right child, same as unweight cases
 			{
 				Msg tempMsg = leaf->_parent->insertX(msg._a);
 				if (tempMsg._c == 2)
