@@ -9,6 +9,7 @@ using namespace std;
 //=====test========
 //======test2========
 
+// the X vertex info has been adjusted before saving
 vector<Y> allExistingY;	// TBD: use BST to store Y nodes
 vector<X> allExistingX;
 UnitTest * ut;
@@ -40,7 +41,7 @@ int main()
 	}
 
 
-
+	// create a new DS-Tree root
 	AdvancedDSTree* pTree = new AdvancedDSTree();
 
 	char command;
@@ -152,6 +153,7 @@ int main()
 	ut = new UnitTest(allExistingX, allExistingY);
 	ut->printUnitTest();
 
+	// print the info of all X and all Y
 	for (int i = 0; i < allExistingX.size(); i++)
 	{
 		X x = allExistingX[i];

@@ -7,21 +7,23 @@ ESTreeNode::ESTreeNode(int leafNum)
 	_min = 0;
 }
 
-// build ESTree, range from min to max
+// build ESTree, range from min to max, i.e., from 0 to size of values of DS Node
 void ESTree::buildTree(ESTreeNode* &currentRoot, ESTreeNode* parent, int min, int max)
 {
-	currentRoot = new ESTreeNode(max - min + 1);
+	currentRoot = new ESTreeNode(max - min + 1);	// create the current root or node
 	currentRoot->_parent = parent;
 	currentRoot->_min = min;
-	if (min == max)
+	if (min == max)		// if min==max, it is a leaf
 	{
-		currentRoot->_add = min;
-		currentRoot->_min = 0;
+		currentRoot->_add = min;	// b_{j'} = j' - a_{j'} - n_{j'+1}, where j'=j-1
+		currentRoot->_min = 0;		// the min of a leaf is 0
 		currentRoot->_leftChild = NULL;
 		currentRoot->_rightChild = NULL;
 	}
-	else
+	else // it is a node and create the subtree of this node
 	{
+		// split into two; if the total num is odd, the size of left is greater than the one of right
+		// e.g.: the total is 5, the left leaf is 3 and the right is 2.
 		int total = max - min + 1;
 		int half = (total + 1) / 2;
 		int mid = min + half - 1;
@@ -33,10 +35,11 @@ void ESTree::buildTree(ESTreeNode* &currentRoot, ESTreeNode* parent, int min, in
 // initial ESTree from a size
 ESTree::ESTree(int rangeOfY)
 {
-	buildTree(_root, NULL, 0, rangeOfY);
-	//cout << "build ESTree of size " << rangeOfY << endl;
+	// build the tree according to the range of Y by which ES Tree is decided
+	// the range is always from 0 to the size of values of DS node
+	buildTree(_root, NULL, 0, rangeOfY);	
 
-	unitTest("ESTREE");	// for test	
+	//unitTest("ESTREE");	// for unit test	
 }
 
 // locate the k^th leaf in the ESTree
