@@ -71,6 +71,7 @@ ESTreeNode* ESTree::locateLeafK(int k)
 }
 
 // locate the leaf of a_j=j
+// include j
 ESTreeNode* ESTree::locateLeafJ(ESTreeNode* leafK)
 {
 	ESTreeNode* tmp = leafK;	//find the leaf corresponding to k(the k+1 the leaf)
@@ -159,13 +160,98 @@ ESTreeNode* ESTree::locateLeafJ(ESTreeNode* leafK)
 	return leafJ;
 }
 
+// locate the leaf of a_j=j before k
+// exclude l, return l+1, from l+1 to k is the replaceable set
+ESTreeNode* ESTree::locateLeafL(ESTreeNode* leafK)
+{
+	ESTreeNode* tmp = leafK;	//find the leaf corresponding to k(the k+1 the leaf)
+	int tempSum = 0;
+	while (tmp != NULL)	// compute sum(k)
+	{
+		tempSum += tmp->_add;
+		tmp = tmp->_parent;
+	}
+	tmp = leafK;
+
+	ESTreeNode* nodeContainL = NULL;
+	ESTreeNode* leafL = NULL;
+	bool isFindL = false;	// to test whether there is a tight point before k; true: exists, false: not exists
+
+	// find the internal node containing l
+
+	//tempSum -= tmp->_add;		
+	while (tmp->_parent != NULL)
+	{
+		if (tmp == tmp->_parent->_leftChild)
+		{
+			tempSum -= tmp->_add;
+			tmp = tmp->_parent;
+		}
+		else
+		{
+			ESTreeNode* sibling = tmp->_parent->_leftChild;
+			int i = tempSum - tmp->_add + sibling->_add + sibling->_min;
+			if (i < 0)
+			{
+				tempSum -= tmp->_add;
+				nodeContainL = tmp->_parent;
+				if (nodeContainL->_parent == NULL)
+				{
+					isFindL = true;
+				}
+				break;
+			}
+			else
+			{
+				tempSum -= tmp->_add;
+				tmp = tmp->_parent;
+			}
+		}
+	}
+	if (nodeContainL == NULL && isFindL == false)
+	{
+		nodeContainL = _root;
+	}
+
+
+	// find the leaf j
+	if (nodeContainL->_parent == NULL && isFindL == false)	// in the root, i.e., l=0
+	{
+		tmp = nodeContainL->_leftChild;
+		while (tmp->_leftChild != NULL)
+		{
+			tmp = tmp->_leftChild;
+		}
+		leafL = tmp;
+	}
+	else
+	{
+		tmp = nodeContainL->_leftChild;
+		while (tmp->_leftChild != NULL)
+		{
+			tempSum += tmp->_add;
+			if (tempSum + tmp->_rightChild->_add + tmp->_rightChild->_min < 0)
+			{
+				tmp = tmp->_rightChild;
+			}
+			else
+			{
+				tmp = tmp->_leftChild;
+			}
+		}
+		leafL = tmp;
+	}
+
+	return leafL;
+}
+
 // update b_j from the leaf k to the leaf j
 void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 {
 	if (leafK == leafJ)
 	{
-		leafK->_add += diff;
-		updateMin(leafK);
+		/*leafK->_add += diff;
+		updateMin(leafK);*/
 		return;
 	}
 
@@ -225,9 +311,16 @@ void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 			anc = temp;
 
 		}
-		anc->_add += diff;
+		// anc->_add += diff; // leaf j should not be updated
 		updateMin(anc);
 	}
+}
+
+// for the x_k, increase the value of b_j from k-1 to m
+void ESTree::deleteVariable4J(int kOfX)
+{	
+	ESTreeNode* leafK = locateLeafK(kOfX - 1);	// this is the implementation model, so k -> k-1					
+	updateBjFromK2J(leafK, leafK, +1);			// update the value of b_j or _add for the leaf of j, implictly.
 }
 
 // for the x_k, increase the value of b_j from k-1 to m
@@ -239,13 +332,15 @@ void ESTree::deleteVariable(int kOfX)
 	}
 
 	ESTreeNode* leafK = locateLeafK(kOfX - 1);	// this is the implementation model, so k -> k-1				
-	ESTreeNode* lastLeaf = _root;	
+	ESTreeNode* lastLeaf = _root;
 
 	while (lastLeaf->_rightChild != NULL)
 	{
 		lastLeaf = lastLeaf->_rightChild;
 	}
 	updateBjFromK2J(leafK, lastLeaf, +1);			// update the value of b_j or _add for the leaf or nodes between k and j, implictly.
+	lastLeaf->_add += +1;
+	updateMin(lastLeaf);
 }
 
 
@@ -264,6 +359,8 @@ void ESTree::appendVariable(int kOfX)
 		lastLeaf = lastLeaf->_rightChild;
 	}
 	updateBjFromK2J(leafK, lastLeaf, -1);			// update the value of b_j or _add for the leaf or nodes between k and j, implictly.
+	lastLeaf->_add += -1;
+	updateMin(lastLeaf);
 }
 
 // return j, such that a_j=j
@@ -284,10 +381,55 @@ int ESTree::insertVariable(int k)
 
 	/*int a = getIndex(leafJ);
 	int b = getIndex(leafK);*/
-	unitTest("ESTREE");	// for test	
+	//unitTest("ESTREE");	// for test	
 
 	int j = getIndex(leafJ);
 	return j;
+}
+
+// k is the index of leaf, which is the result of m+1-k' where k' is the sequence of the BEG[x]
+int ESTree::getLbyK(int k)
+{
+	if (k > _root->_leafNum - 1)
+	{
+		k = _root->_leafNum - 1;
+	}
+	ESTreeNode* leafK = locateLeafK(k - 1);
+	ESTreeNode* leafJ = locateLeafJ(leafK);
+	int j = getIndex(leafJ);
+	return j;
+}
+
+// k is the index of leaf, return the L in the right of k, called the 2nd L
+int ESTree::get2ndLbyK(int k)
+{
+	if (k > _root->_leafNum - 1)
+	{
+		k = _root->_leafNum - 1;
+	}
+	ESTreeNode* leafK = locateLeafK(k - 1);
+	ESTreeNode* leafL = locateLeafL(leafK);
+
+	ESTreeNode* tempNode = leafL;
+	int tempSum = 0;
+	while (true)
+	{
+		tempSum += tempNode->_add;
+		if (tempNode == _root)
+		{
+			break;
+		}
+		tempNode = tempNode->_parent;
+	}
+	if (tempSum >= 0)
+	{
+		return 0;
+	}
+	else
+	{
+		int l2 = getIndex(leafL);
+		return l2;
+	}
 }
 
 void ESTree::updateMin(ESTreeNode* node)

@@ -32,8 +32,10 @@ private:
 	int findMinBj(int k);
 	void decreaseAdd(int k, int j);
 	ESTreeNode* locateLeafK(int k);
-	ESTreeNode* locateLeafJ(ESTreeNode*);
+	ESTreeNode* locateLeafJ(ESTreeNode*);	// the a_j=j after k
 	void updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff);
+
+	ESTreeNode* locateLeafL(ESTreeNode*);	// the a_j=j before k
 	
 
 	//auxiluary fuction
@@ -57,5 +59,9 @@ public:
 
 	void deleteVariable(int);
 	void appendVariable(int);
+	void deleteVariable4J(int kOfX);
+
+	int getLbyK(int);
+	int get2ndLbyK(int);
 };
 

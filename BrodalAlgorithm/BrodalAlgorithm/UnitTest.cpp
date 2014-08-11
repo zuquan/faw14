@@ -4,6 +4,8 @@
 #include<Windows.h>
 #include<time.h>
 
+extern ofstream outDebug;
+
 bool cmpX_ID(X x1, X x2)
 {
 	return x1._id < x2._id;
@@ -12,6 +14,26 @@ bool cmpX_ID(X x1, X x2)
 bool cmpY_UT(Y y1, Y y2)
 {
 	return y1._y < y2._y;
+}
+
+// priority: increasing begin, increasing end, increasing id
+bool cmpXBegInc_UT(X x1, X x2)
+{
+	if (x1._begin == x2._begin)
+	{
+		if (x1._end == x2._end)
+		{
+			return x1._id < x2._id;
+		}
+		else
+		{
+			return x1._end < x2._end;
+		}
+	}
+	else
+	{
+		return x1._begin < x2._begin;
+	}
 }
 
 void UnitTest::testTest()
@@ -106,7 +128,7 @@ X UnitTest::mateOfY(Y y)
 void UnitTest::testGloverMatching(vector<X> inputX, vector<Y>inputY,
 	vector<X>& resultX, vector<Y>& resultY, vector<M>& resultM)
 {
-	
+
 	for (int i = 0; i < inputY.size(); i++)
 	{
 		vector<X> selectedX;
@@ -160,14 +182,26 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 	}
 }
 
-void generator()
+void generator(char* fileName)
 {
+
+	
+	/*int range = 80;
+	int xnum = 400;
+	int maxw = 1000;*/
+
+	
+	cout << "input range of Y" << endl;
 	int range;
 	cin >> range;
 	int xnum;
+	cout << "input the number of X" << endl;
 	cin >> xnum;
-
-	ofstream of("input.txt");
+	int maxw;
+	cout << "input the max weight" << endl;
+	cin >> maxw;
+	
+	ofstream of(fileName);
 
 	of << range << endl;
 
@@ -180,10 +214,18 @@ void generator()
 
 	vector<int> begin;
 	vector<int> end;
+	vector<int> weight;
 
-	SYSTEMTIME lpsystime;
+	/*SYSTEMTIME lpsystime;
+	GetLocalTime(&lpsystime);*/
+	int seed;
+	cout << "input seed of rand" << endl;
+	cin >> seed;
+	srand(seed);
+
+	/*SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
-	srand(lpsystime.wMilliseconds);
+	srand(lpsystime.wMinute*1000 + lpsystime.wMilliseconds);*/
 
 	for (int i = 1; i <= xnum; i++)
 	{
@@ -199,6 +241,8 @@ void generator()
 		}
 		begin.push_back(b);
 		end.push_back(e);
+		int w = rand() % maxw + 1;
+		weight.push_back(w);
 	}
 
 
@@ -209,17 +253,18 @@ void generator()
 		of << i << " ";
 		of << begin[i - 1] << " ";
 		of << end[i - 1] << " ";
+		of << weight[i - 1] << " ";
 	}
-	for (int i = 1; i <= xnum; i++)
+	/*for (int i = 1; i <= xnum; i++)
 	{
-		of << endl;
-		of << 6 << " " << i << " " << begin[i - 1] << " " << end[i - 1];
+	of << endl;
+	of << 6 << " " << i << " " << begin[i - 1] << " " << end[i - 1] << " "<<weight[i - 1];
 	}
 	for (int i = 1; i <= range; i++)
 	{
-		of << endl;
-		of << 8 << " " << i;
-	}
+	of << endl;
+	of << 8 << " " << i;
+	}*/
 	of << endl;
 	of << '$' << endl;
 
@@ -230,6 +275,17 @@ void generator()
 
 }
 
+void UnitTest::printRootESTree(AdvancedDSTree * dt)
+{
+	AdvancedDSTreeNode* node = dt->_root;
+	if (node != NULL)
+	{
+		//outDebug << "ESTree " << endl;
+		verifiyESTree(node->_pESTree->_root);
+		//outDebug << "EETree " << endl;
+		//verifiyESTree(node->_pEETree->_root);
+	}	
+}
 
 void UnitTest::verifiyESTree(ESTreeNode* node)
 {
@@ -239,7 +295,8 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 		root = root->_parent;
 	}
 
-	ofstream out("debug.txt", ios_base::in|ios_base::app);
+	//ofstream outDebug("debug.txt", ios_base::in | ios_base::app);
+	//ofstream out("debug.txt");
 
 	// cout << "debug ESTREE format: (index, add, min, leafNum)" << endl;
 	deque<ESTreeNode*> queue;
@@ -249,7 +306,7 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 
 	while (queue.empty() == false)
 	{
-		cout << "level " << level++ << ": ";
+//		outDebug << "level " << level++ << ": ";
 		int size = queue.size();
 		for (int i = 0; i < size; i++)
 		{
@@ -260,10 +317,81 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 				queue.push_back(tmp->_leftChild);
 				queue.push_back(tmp->_rightChild);
 			}
-			out << '(' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
-			//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			if (tmp->_leftChild != NULL)
+			{
+				outDebug << '(' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+				//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			}
+			else
+			{
+				outDebug << "( L: " << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			}
+			
 		}
-		out << endl;
-	}	
+		outDebug << endl;
+	}
+	outDebug << endl;
 }
 
+void UnitTest::testLocatIndexL(AdvancedDSTree * tree)
+{
+	X x;
+	Y y;
+	y._y = 1;
+	x._begin = y;
+	y._y = 3;
+	x._end = y;
+
+	AdvancedDSTreeNode *node = tree->_root;
+
+	vector<Y>* pESValues;
+	if (node->_rightChild != NULL)
+	{
+		pESValues = &node->_rightChild->_values;
+	}
+	else
+	{
+		pESValues = &node->_values;
+	}
+
+	int kOfX = node->sizeOfY((*pESValues)[0], x._end);
+
+	ESTreeNode* leafK = node->_pESTree->locateLeafK(3);	// this is the implementation model, so k -> k-1
+	ESTreeNode* leafJ = node->_pESTree->locateLeafL(leafK);	// compute a_j=j
+
+	//verifiyESTree(node->_pESTree->_root);
+	int a = 0;
+}
+
+
+void UnitTest::testEETree(AdvancedDSTree * tree)
+{
+	int b = tree->_root->_pEETree->getLbyK(1);
+	int a = 0;
+}
+
+void UnitTest::testLbyK(AdvancedDSTreeNode * node, X x)
+{
+	sort(node->_matched.begin(), node->_matched.end(), cmpXBegInc_UT);
+	vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), x);
+
+
+
+}
+
+
+void UnitTest::unitTestWeightXMatchedSet(AdvancedDSTree * tree)
+{
+	ofstream out("outputUT_FAW.txt");
+	// out << "test";
+
+	AdvancedDSTreeNode * node = tree->_root;
+	sort(node->_matched.begin(), node->_matched.end(), cmpX_ID);
+
+	for (int i = 0; i < node->_matched.size(); i++)
+	{
+		out << node->_matched[i]._id << endl;
+	}
+
+	out.close();
+}

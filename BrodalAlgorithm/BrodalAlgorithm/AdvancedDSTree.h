@@ -15,11 +15,13 @@ private:
 	vector<X> _matched2;//matched'
 	vector<X> lp;//W
 	vector<X> update;
+	vector<X> _transFromLMatch;	// intersection of L.transferred and matched2
 		//vector<X> _variables2;//variables'
 		//vector<X> _transferred2;//transferred'
 	
 
 	ESTree* _pESTree;
+	ESTree* _pEETree;
 
 	AdvancedDSTreeNode* _parent;
 	AdvancedDSTreeNode* _leftChild;
@@ -34,7 +36,22 @@ private:
 
 	void removeX(Msg m);	//for the case of msg fail-success and fail-fail expcetional.
 	void appendX(Msg m);
+
+	void removeXinWeightProcess(X x);
+	void appendXinWeightProcess(X x);
+
+	void replaceMinX();		// find the min replaceable x and repalce it.
+	bool findExtensionX();	// whether there is a extension x from transferred L
 	
+	vector<Y> getESValues();
+
+	AdvancedDSTreeNode* pullBackATransferredXInWeightProcess(AdvancedDSTreeNode* infeasibleNode, X minWeightX, Msg, bool& backXeqInsertX, X&);
+	Y getReferenceXBeg(X);
+	vector<X> getReferenceMatchedSet2(AdvancedDSTreeNode* node, X x1, X jX);
+
+	void undoESInsert(Msg m);
+	vector<X> getReplaceableSetByEETree(X x);
+	vector<X> getReplaceableSetByESTree(X x);
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
@@ -42,11 +59,13 @@ public:
 	void initESTree();
 	Y getIntervalStart();
 	friend class AdvancedDSTree;
+	friend class UnitTest;
 	Msg insertX(X x);
 };
 
 class AdvancedDSTree
 {
+//public:
 private:
 	AdvancedDSTreeNode* _root;
 	AdvancedDSTreeNode* locateLeafOfX(X x);	
@@ -55,6 +74,15 @@ private:
 	void updateAuxSet4Split(AdvancedDSTreeNode*);
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
 	X gloverMatchingInLeafForAnY(AdvancedDSTreeNode*, Y);
+
+	void replaceableSetOfP(AdvancedDSTreeNode*, X, X, vector<X> &);
+	void repalceableSetOfLeftChild(AdvancedDSTreeNode*, X, vector<X> &);
+	X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X, X, AdvancedDSTreeNode*&);
+	bool continueCalToLeft(AdvancedDSTreeNode* curNode, vector<X>& replaceableX);
+
+	X replaceMinWeightX(AdvancedDSTreeNode*, Msg);
+
+	Msg fixInfeasible2TransCase(AdvancedDSTreeNode* leaf, X addX, Msg);
 	
 public:
 	AdvancedDSTree();
@@ -68,5 +96,9 @@ public:
 
 	void verifiyDSTree(AdvancedDSTreeNode* root);
 	void unitTestDS(string str);
+
+	friend class UnitTest;
+
+
 
 };

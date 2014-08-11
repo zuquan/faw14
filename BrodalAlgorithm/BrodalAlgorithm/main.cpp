@@ -1,28 +1,29 @@
 #include<iostream>
 #include<fstream>
+#include<windows.h>
 
 #include"AdvancedDSTree.h"
 #include"UnitTest.h"
 
 using namespace std;
 
-//=====test========
-//======test2========
-
-// the X vertex info has been adjusted before saving
 vector<Y> allExistingY;	// TBD: use BST to store Y nodes
 vector<X> allExistingX;
-UnitTest * ut;
+//UnitTest * ut;
+ofstream outDebug("debug.txt");
+//AdvancedDSTree* debugTree;
 
-void generator();
+void generator(char *);
+ofstream olog("replaceLogFAW.txt");
+
 
 int main()
 {
-	//cout << "hello" << endl;
 	//open a file
-	generator();
+	generator("input.txt");
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
+	
 	if (!in)
 	{
 		cout << "input file open error" << endl;
@@ -40,9 +41,8 @@ int main()
 		allExistingY.push_back(temp);
 	}
 
-
-	// create a new DS-Tree root
 	AdvancedDSTree* pTree = new AdvancedDSTree();
+	//debugTree = pTree;
 
 	char command;
 	while (!in.eof())
@@ -65,7 +65,7 @@ int main()
 		case '1':
 		{
 				  X x;
-				  in >> x._id >> x._begin._y >> x._end._y;
+				  in >> x._id >> x._begin._y >> x._end._y >> x._w;
 				  if (pTree->adjustXToProper(x) == false)
 				  {
 					  cout << x._id << " insert fail" << endl;					  
@@ -75,7 +75,16 @@ int main()
 				  {
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
+
+				  /*if (x._id == 8)
+				  {
+					  int a = 0;
+				  }			*/	  
 				  pTree->insertX(x);
+				  /*outDebug << "x: " << x._id << '\t' << x._begin << '\t' << x._end << '\t' << x._w << endl;
+				  ut->printRootESTree(debugTree);*/
+				  int a = 0;
+				  
 		}break;
 
 
@@ -149,38 +158,47 @@ int main()
 	
 	//pTree->unitTestDS("DSTREE");	// unit test
 	cout << "end" << endl;
+	olog.close();
 
-	ut = new UnitTest(allExistingX, allExistingY);
-	ut->printUnitTest();
+	//system("LWCBGNew.exe");
 
-	// print the info of all X and all Y
-	for (int i = 0; i < allExistingX.size(); i++)
-	{
-		X x = allExistingX[i];
-		if (pTree->isXMatched(x) == true)
-		{
-			out << "x:" << x._id << " is matched with y:" << pTree->queryXMate(x) << endl;
-		}
-		else
-		{
-			out << "x:" << x._id << " is not matched." << endl;
-		}
-	}
+	//ut = new UnitTest(allExistingX, allExistingY);
+	//ut->unitTestWeightXMatchedSet(pTree);
 
-	for (int i = 0; i < allExistingY.size(); i++)
-	{
-		Y y = allExistingY[i];
-		if (pTree->isYMatched(y) == true)
-		{
-			out << "y:" << y._y << " is matched with x:" << pTree->queryYMate(y) << endl;
-		}
-		else
-		{
-			out << "y:" << y._y << " is not matched." << endl;
-		}
-	}
+	//outDebug.close();
 
-	// unit test
+	//ut->printUnitTest();
+
+	//ut->testEETree(pTree);
+
+	//for (int i = 0; i < allExistingX.size(); i++)
+	//{
+	//	X x = allExistingX[i];
+	//	if (pTree->isXMatched(x) == true)
+	//	{
+	//		out << "x:" << x._id << " is matched with y:" << pTree->queryXMate(x) << endl;
+	//	}
+	//	else
+	//	{
+	//		out << "x:" << x._id << " is not matched." << endl;
+	//	}
+	//}
+
+	//for (int i = 0; i < allExistingY.size(); i++)
+	//{
+	//	Y y = allExistingY[i];
+	//	if (pTree->isYMatched(y) == true)
+	//	{
+	//		out << "y:" << y._y << " is matched with x:" << pTree->queryYMate(y) << endl;
+	//	}
+	//	else
+	//	{
+	//		out << "y:" << y._y << " is not matched." << endl;
+	//	}
+	//}
+
+	//// unit test
+	//ut->testLocatIndexL(pTree);
 	
 	
 
