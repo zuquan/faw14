@@ -160,14 +160,26 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 	}
 }
 
-void generator()
+void generator(char* fileName)
 {
+
+	
+	/*int range = 80;
+	int xnum = 400;
+	int maxw = 1000;*/
+
+	
+	cout << "input range of Y" << endl;
 	int range;
 	cin >> range;
 	int xnum;
+	cout << "input the number of X" << endl;
 	cin >> xnum;
-
-	ofstream of("input.txt");
+	int maxw;
+	cout << "input the max weight" << endl;
+	cin >> maxw;
+	
+	ofstream of(fileName);
 
 	of << range << endl;
 
@@ -180,10 +192,18 @@ void generator()
 
 	vector<int> begin;
 	vector<int> end;
+	vector<int> weight;
 
-	SYSTEMTIME lpsystime;
+	/*SYSTEMTIME lpsystime;
+	GetLocalTime(&lpsystime);*/
+	int seed;
+	cout << "input seed of rand" << endl;
+	cin >> seed;
+	srand(seed);
+
+	/*SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
-	srand(lpsystime.wMilliseconds);
+	srand(lpsystime.wMinute*1000 + lpsystime.wMilliseconds);*/
 
 	for (int i = 1; i <= xnum; i++)
 	{
@@ -199,6 +219,8 @@ void generator()
 		}
 		begin.push_back(b);
 		end.push_back(e);
+		int w = rand() % maxw + 1;
+		weight.push_back(w);
 	}
 
 
@@ -209,17 +231,18 @@ void generator()
 		of << i << " ";
 		of << begin[i - 1] << " ";
 		of << end[i - 1] << " ";
+		of << weight[i - 1] << " ";
 	}
-	for (int i = 1; i <= xnum; i++)
+	/*for (int i = 1; i <= xnum; i++)
 	{
-		of << endl;
-		of << 6 << " " << i << " " << begin[i - 1] << " " << end[i - 1];
+	of << endl;
+	of << 6 << " " << i << " " << begin[i - 1] << " " << end[i - 1] << " "<<weight[i - 1];
 	}
 	for (int i = 1; i <= range; i++)
 	{
-		of << endl;
-		of << 8 << " " << i;
-	}
+	of << endl;
+	of << 8 << " " << i;
+	}*/
 	of << endl;
 	of << '$' << endl;
 

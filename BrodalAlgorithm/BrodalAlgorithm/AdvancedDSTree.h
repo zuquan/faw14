@@ -20,6 +20,7 @@ private:
 	
 
 	ESTree* _pESTree;
+	ESTree* _pEETree;
 
 	AdvancedDSTreeNode* _parent;
 	AdvancedDSTreeNode* _leftChild;
@@ -34,7 +35,12 @@ private:
 
 	void removeX(Msg m);	//for the case of msg fail-success and fail-fail expcetional.
 	void appendX(Msg m);
+	void removeXinRightOfP(X x);
+	void appendXinRightOfP(X x);
+	void removeXinLeftOfP(X);
+	void moveXFromRight2Left(X);
 	
+	const vector<Y>& getESValues();
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
@@ -42,6 +48,7 @@ public:
 	void initESTree();
 	Y getIntervalStart();
 	friend class AdvancedDSTree;
+	friend class UnitTest;
 	Msg insertX(X x);
 };
 
@@ -55,6 +62,11 @@ private:
 	void updateAuxSet4Split(AdvancedDSTreeNode*);
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
 	X gloverMatchingInLeafForAnY(AdvancedDSTreeNode*, Y);
+
+	void replaceableSetOfP(AdvancedDSTreeNode*, X, X, vector<X> &, vector<X> &);
+	vector<X> getLeftReplaceableSetOfP(AdvancedDSTreeNode*, X);
+	//X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X, X, AdvancedDSTreeNode*&);
+	X replaceMinWeightX(AdvancedDSTreeNode*, Msg);
 	
 public:
 	AdvancedDSTree();
@@ -68,5 +80,9 @@ public:
 
 	void verifiyDSTree(AdvancedDSTreeNode* root);
 	void unitTestDS(string str);
+
+	friend class UnitTest;
+
+
 
 };

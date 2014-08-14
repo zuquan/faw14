@@ -47,9 +47,10 @@ struct X
 	int _id;
 	Y _begin;
 	Y _end;
+	int _w;	// weight, assume it is positive
 	bool operator==(const X& x)
 	{
-		return this->_id == x._id && this->_begin == x._begin && this->_end == x._end;
+		return this->_id == x._id;
 	}
 };
 ostream& operator<<(ostream& os, const X& rhs);
