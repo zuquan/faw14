@@ -57,5 +57,7 @@ public:
 
 	void deleteVariable(int);
 	void appendVariable(int);
+
+	int getLbyK(int);
 };
 

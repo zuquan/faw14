@@ -285,6 +285,19 @@ int ESTree::insertVariable(int k)
 
 	int j = getIndex(leafJ);
 	return j;
+
+// k is the index of leaf, which is the result of m+1-k' where k' is the sequence of the BEG[x]
+int ESTree::getLbyK(int k)
+{
+	if (k > _root->_leafNum - 1)
+	{
+		k = _root->_leafNum - 1;
+	}
+	ESTreeNode* leafK = locateLeafK(k - 1);
+	ESTreeNode* leafJ = locateLeafJ(leafK);
+	int j = getIndex(leafJ);
+	return j;
+}
 }
 
 void ESTree::updateMin(ESTreeNode* node)

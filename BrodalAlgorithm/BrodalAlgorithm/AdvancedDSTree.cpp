@@ -13,6 +13,12 @@ bool cmpY(Y y1, Y y2)
 	return y1._y < y2._y;
 }
 
+// priority: increasing id
+bool cmpXID(X x1, X x2)	
+{	
+	return x1._id < x2._id;
+}
+
 // priority: increasing end, decreasing id
 bool cmpX1(X x1, X x2)	//if x1.end == x2.end then (x1<x2 iff x1.id>x2.id)
 {
@@ -932,11 +938,52 @@ void AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x1, X jX, vec
 // return the replacement set in the left part of P. x is the inserted vertex.
 vector<X> AdvancedDSTree::getLeftReplaceableSetOfP(AdvancedDSTreeNode* node, X x)
 {
+	vector<X> tmp;
+	sort(node->_matched.begin(), node->_matched.end(), cmpXID);
+	sort(node->_matched2.begin(), node->_matched2.end(), cmpXID);
+	int i = 0;
+	int j = 0;
+	while (j < node->_matched2.size())
+	{
+		if (!(node->_matched[i] == node->_matched2[j]))
+		{
+			tmp.push_back(node->_matched[i]);
+			i++;
+		}
+		else
+		{
+			i++;
+			j++;
+		}
+	}
+	if (i < node->_matched.size())
+	{
+		while (i < node->_matched.size())
+		{
+			tmp.push_back(node->_matched[i]);
+			i++;
+		}
+	}
+
 	vector<X> rset;
+	int kOfX = node->sizeOfY(node->getESValues()[0], x._begin);
+	int l = node->_pEETree->getLbyK(node->_pEETree->allLeafNum() - kOfX);	// m+1-k'
+	if (l > tmp.size())
+	{
+		l = tmp.size();
+	}
+
+	sort(tmp.begin(), tmp.end(), cmpXBegDec);
+	for (int i = 0; i < l; i++)
+	{
+		rset.push_back(tmp[i]);
+	}
+	rset.push_back(x);	// add the inserted x iteself
 
 	return rset;
 }
 
+// get the values of ESTree, i.e., the values of the right child
 const vector<Y>& AdvancedDSTreeNode::getESValues()
 {
 	if (_rightChild != NULL)
