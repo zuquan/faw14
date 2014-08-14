@@ -138,7 +138,7 @@ AdvancedDSTreeNode::AdvancedDSTreeNode(vector<Y> allY)
 {
 	//cout << "create estree " << rangeOfY << endl;
 	_pESTree = new ESTree(allY.size());
-	_pEETree = new ESTree(allY.size());
+	_pEETree = NULL;	// there is NO EETree for a leaf
 	sort(allY.begin(), allY.end(), cmpY);
 	for (int i = 0; i < (int)allY.size(); i++)
 	{
@@ -218,19 +218,24 @@ void AdvancedDSTree::updateAuxSet4Split(AdvancedDSTreeNode* node)
 		case 0:	// matched
 		{
 					node->_matched.push_back(tmpX);
+					node->_pEETree->appendVariable(node->_pEETree->allLeafNum() - node->sizeOfY(node->_values[0], tmpX._begin));
 		}break;
 		case 1:	// transferred, add a into matched, delete b from matched, and add b into ES
 		{
 					node->_matched.push_back(tmpX);
+					node->_pEETree->appendVariable(node->_pEETree->allLeafNum() - node->sizeOfY(node->_values[0], tmpX._begin));
 					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
 					node->_matched.erase(it);
+					node->_pEETree->deleteVariable(node->_pEETree->allLeafNum() - node->sizeOfY(node->_values[0], msg._b._begin));
 					node->insertX(msg._b);
 		}break;
 		case 2:	// infeasible, add a into matched, remove b from matched and insert it into infeasible
 		{
 					node->_matched.push_back(tmpX);
+					node->_pEETree->appendVariable(node->_pEETree->allLeafNum() - node->sizeOfY(node->_values[0], tmpX._begin));
 					vector<X>::iterator it = find(node->_matched.begin(), node->_matched.end(), msg._b);
 					node->_matched.erase(it);
+					node->_pEETree->deleteVariable(node->_pEETree->allLeafNum() - node->sizeOfY(node->_values[0], msg._b._begin));
 					node->_infeasible.push_back(msg._b);
 		}break;
 		}
@@ -256,8 +261,8 @@ void AdvancedDSTree::splitDSNode(AdvancedDSTreeNode* node, X x)
 	AdvancedDSTreeNode* rightChild = new AdvancedDSTreeNode(rightVecY);
 
 	node->deleteCurrentESTree();
-	node->_pESTree = new ESTree(rightVecY.size());
-	node->_pEETree = new ESTree(rightVecY.size());
+	node->_pEETree = new ESTree(leftVecY.size());	// EETree for the left part of P
+	node->_pESTree = new ESTree(rightVecY.size());	
 
 	leftChild->_variables = node->_variables;	// copy the variables from the parent
 
@@ -333,12 +338,14 @@ bool AdvancedDSTree::insertX(X &x)
 			if (msg._aEmpty == false)
 			{
 				leaf->_parent->_matched.push_back(msg._a);
+				leaf->_parent->_pEETree->appendVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->_parent->sizeOfY(leaf->_parent->_values[0], msg._a._begin));
 			}
 			if (msg._bEmpty == false)
 			{
 				// questions: is it possible that the b is not in the matched set of the parent?
 				vector<X>::iterator it = find(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), msg._b);
 				leaf->_parent->_matched.erase(it);
+				leaf->_parent->_pEETree->deleteVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->_parent->sizeOfY(leaf->_parent->_values[0], msg._b._begin));
 			}
 
 			if (msg._c == 2)	// infeasible
@@ -351,6 +358,10 @@ bool AdvancedDSTree::insertX(X &x)
 				msg._b = tempMsg._b;
 				msg._bEmpty = tempMsg._bEmpty;
 				msg._c = tempMsg._c;
+				if (tempMsg._c == 2)
+				{
+					msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replacement algorithm
+				}
 			}
 		}
 		else // leaf is right child
@@ -374,14 +385,15 @@ bool AdvancedDSTree::insertX(X &x)
 			else
 			{
 				Msg tempMsg = leaf->_parent->insertX(msg._a);
-				if (tempMsg._bEmpty == false && msg._bEmpty == false && cmpX3(msg._b, tempMsg._b) == true)		//msg._b<tempMsg._b
+				// msg._b < tempMsg._b, i.e., msg.b is still in the parent and it should be preempted
+				if (tempMsg._bEmpty == false && msg._bEmpty == false && cmpX3(msg._b, tempMsg._b) == true)		
 				{
 					// remove the msg._b from parent
 					leaf->_parent->removeX(msg);
 					// pull the tempMsg._b back
 					leaf->_parent->appendX(tempMsg);
 				}
-				else if (tempMsg._bEmpty == true && msg._bEmpty != true)
+				else if (tempMsg._bEmpty == true && msg._bEmpty != true)	// msg.b is in the parent
 				{
 					leaf->_parent->removeX(msg);
 				}
@@ -406,7 +418,16 @@ bool AdvancedDSTree::insertX(X &x)
 		if (msg._bEmpty == false)	// b, which will be deleted, is in matched before
 		{
 			_root->update.push_back(msg._b);
+			olog << "insert id:" << msg._a._id << " replace id:" << msg._b._id << endl;
 		}
+		else
+		{
+			olog << "insert id:" << msg._a._id << " success" << endl;
+		}
+	}
+	else
+	{
+		olog << "insert id:" << msg._a._id << " fail" << endl;
 	}
 
 	return true;
@@ -495,8 +516,15 @@ void AdvancedDSTreeNode::moveXFromRight2Left(X x)
 int AdvancedDSTreeNode::sizeOfY(Y start, Y end)
 {
 	// assertion: start<=end && end<=max(Y)
+	if (end < start)//in EETree
+	{
+		end = start;
+	}
 	if (start > end || end > allExistingY[allExistingY.size() - 1])
+	{
 		return 0;
+	}
+
 	int i = 0;
 	int size = 0;
 	while (i < (int)allExistingY.size() && end >= allExistingY[i])
@@ -525,6 +553,7 @@ void AdvancedDSTreeNode::deleteCurrentESTree(ESTreeNode* currentNode)
 void AdvancedDSTreeNode::deleteCurrentESTree()
 {
 	deleteCurrentESTree(this->_pESTree->_root);
+	deleteCurrentESTree(this->_pEETree->_root);
 }
 
 
@@ -721,10 +750,10 @@ void AdvancedDSTreeNode::queryUpdateNodeW()
 
 	for (itUpdateList = update.begin(); itUpdateList != update.end(); itUpdateList++)
 	{
-		if ((*itUpdateList)._id == 12)
+		/*if ((*itUpdateList)._id == 12)
 		{
 			int ad = 0;
-		}
+		}*/
 		vector<X>::iterator itMatching = find(_matching.begin(), _matching.end(), *itUpdateList);
 		if (itMatching != _matching.end())	// in matching
 		{

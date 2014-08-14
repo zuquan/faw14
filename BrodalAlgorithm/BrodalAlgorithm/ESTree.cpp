@@ -161,8 +161,8 @@ void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 {
 	if (leafK == leafJ)
 	{
-		leafK->_add += diff;
-		updateMin(leafK);
+		/*leafK->_add += diff;
+		updateMin(leafK);*/
 		return;
 	}
 
@@ -222,7 +222,7 @@ void ESTree::updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff)
 			anc = temp;
 
 		}
-		anc->_add += diff;
+		// anc->_add += diff; // leaf j should not be updated
 		updateMin(anc);
 	}
 }
@@ -243,6 +243,8 @@ void ESTree::deleteVariable(int kOfX)
 		lastLeaf = lastLeaf->_rightChild;
 	}
 	updateBjFromK2J(leafK, lastLeaf, +1);			// update the value of b_j or _add for the leaf or nodes between k and j, implictly.
+	lastLeaf->_add += +1;
+	updateMin(lastLeaf);
 }
 
 
@@ -261,6 +263,8 @@ void ESTree::appendVariable(int kOfX)
 		lastLeaf = lastLeaf->_rightChild;
 	}
 	updateBjFromK2J(leafK, lastLeaf, -1);			// update the value of b_j or _add for the leaf or nodes between k and j, implictly.
+	lastLeaf->_add += -1;
+	updateMin(lastLeaf);
 }
 
 // return j, such that a_j=j
@@ -281,7 +285,7 @@ int ESTree::insertVariable(int k)
 
 	/*int a = getIndex(leafJ);
 	int b = getIndex(leafK);*/
-	unitTest("ESTREE");	// for test	
+	//unitTest("ESTREE");	// for test	
 
 	int j = getIndex(leafJ);
 	return j;
