@@ -9,9 +9,10 @@ using namespace std;
 
 vector<Y> allExistingY;	// TBD: use BST to store Y nodes
 vector<X> allExistingX;
-//UnitTest * ut;
+
 ofstream outDebug("debug.txt");
 //AdvancedDSTree* debugTree;
+//UnitTest * ut;
 
 void generator(char *);
 ofstream olog("replaceLogFAW.txt");
@@ -38,8 +39,6 @@ int main()
 		in >> temp._y;
 		allExistingY.push_back(temp);
 	}
-
-
 
 	AdvancedDSTree* pTree = new AdvancedDSTree();
 	//debugTree = pTree;
@@ -76,12 +75,12 @@ int main()
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
 
-				  if (x._id == 7)
+				  if (x._id == 8)
 				  {
 					  int a = 0;
 				  }
 				  pTree->insertX(x);
-				  /*outDebug << "x: " << x._id << '\t' << x._begin << '\t' << x._end << '\t' << x._w << endl;
+				 /* outDebug << "x: " << x._id << '\t' << x._begin << '\t' << x._end << '\t' << x._w << endl;
 				  ut->printRootESTree(debugTree);*/
 				  int a = 0;
 				  
@@ -160,7 +159,7 @@ int main()
 	cout << "end" << endl;
 	olog.close();
 
-	system("LWCBGNew.exe");
+	//system("LWCBGNew.exe");
 
 	//ut = new UnitTest(allExistingX, allExistingY);
 	//ut->unitTestWeightXMatchedSet(pTree);

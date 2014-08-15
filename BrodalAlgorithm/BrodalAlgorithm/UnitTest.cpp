@@ -4,6 +4,8 @@
 #include<Windows.h>
 #include<time.h>
 
+extern ofstream outDebug;
+
 bool cmpX_ID(X x1, X x2)
 {
 	return x1._id < x2._id;
@@ -106,7 +108,7 @@ X UnitTest::mateOfY(Y y)
 void UnitTest::testGloverMatching(vector<X> inputX, vector<Y>inputY,
 	vector<X>& resultX, vector<Y>& resultY, vector<M>& resultM)
 {
-	
+
 	for (int i = 0; i < inputY.size(); i++)
 	{
 		vector<X> selectedX;
@@ -163,13 +165,13 @@ UnitTest::UnitTest(vector<X> vX, vector<Y> vY)
 void generator(char* fileName)
 {
 
-	
-	/*int range = 80;
-	int xnum = 400;
-	int maxw = 1000;*/
 
-	
-	cout << "input range of Y" << endl;
+	int range = 5;
+	int xnum = 10;
+	int maxw = 100;
+
+
+	/*cout << "input range of Y" << endl;
 	int range;
 	cin >> range;
 	int xnum;
@@ -177,8 +179,8 @@ void generator(char* fileName)
 	cin >> xnum;
 	int maxw;
 	cout << "input the max weight" << endl;
-	cin >> maxw;
-	
+	cin >> maxw;*/
+
 	ofstream of(fileName);
 
 	of << range << endl;
@@ -196,14 +198,14 @@ void generator(char* fileName)
 
 	/*SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);*/
-	int seed;
+	/*int seed;
 	cout << "input seed of rand" << endl;
 	cin >> seed;
-	srand(seed);
+	srand(seed);*/
 
-	/*SYSTEMTIME lpsystime;
+	SYSTEMTIME lpsystime;
 	GetLocalTime(&lpsystime);
-	srand(lpsystime.wMinute*1000 + lpsystime.wMilliseconds);*/
+	srand(lpsystime.wMinute*1000 + lpsystime.wMilliseconds);
 
 	for (int i = 1; i <= xnum; i++)
 	{
@@ -253,6 +255,25 @@ void generator(char* fileName)
 
 }
 
+void UnitTest::printRootESTree(AdvancedDSTree * dt)
+{
+	AdvancedDSTreeNode* node = dt->_root;
+	if (node->_rightChild != NULL)
+	{
+		node = node->_rightChild;
+
+		if (node->_pEETree != NULL)
+		{
+			verifiyESTree(node->_pEETree->_root);
+		}
+
+
+		//outDebug << "ESTree " << endl;
+		//verifiyESTree(node->_pESTree->_root);
+		//outDebug << "EETree " << endl;
+		//verifiyESTree(node->_pEETree->_root);
+	}
+}
 
 void UnitTest::verifiyESTree(ESTreeNode* node)
 {
@@ -262,7 +283,8 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 		root = root->_parent;
 	}
 
-	ofstream out("debug.txt", ios_base::in|ios_base::app);
+	//ofstream outDebug("debug.txt", ios_base::in | ios_base::app);
+	//ofstream out("debug.txt");
 
 	// cout << "debug ESTREE format: (index, add, min, leafNum)" << endl;
 	deque<ESTreeNode*> queue;
@@ -272,7 +294,7 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 
 	while (queue.empty() == false)
 	{
-		cout << "level " << level++ << ": ";
+		//		outDebug << "level " << level++ << ": ";
 		int size = queue.size();
 		for (int i = 0; i < size; i++)
 		{
@@ -283,10 +305,19 @@ void UnitTest::verifiyESTree(ESTreeNode* node)
 				queue.push_back(tmp->_leftChild);
 				queue.push_back(tmp->_rightChild);
 			}
-			out << '(' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
-			//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			if (tmp->_leftChild != NULL)
+			{
+				outDebug << '(' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+				//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			}
+			else
+			{
+				outDebug << "( L: " << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			}
+
 		}
-		out << endl;
-	}	
+		outDebug << endl;
+	}
+	outDebug << endl;
 }
 

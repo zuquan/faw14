@@ -1,4 +1,8 @@
 #include"ESTree.h"
+#include<fstream>
+
+extern UnitTest* ut;
+extern ofstream outDebug;
 
 ESTreeNode::ESTreeNode(int leafNum)
 {
@@ -36,7 +40,12 @@ ESTree::ESTree(int rangeOfY)
 	buildTree(_root, NULL, 0, rangeOfY);
 	//cout << "build ESTree of size " << rangeOfY << endl;
 
-	unitTest("ESTREE");	// for test	
+	/*if (rangeOfY == 2)
+	{
+		int a = 0;
+		verifiyESTree(_root, a);
+	}*/
+
 }
 
 // locate the k^th leaf in the ESTree
@@ -236,7 +245,7 @@ void ESTree::deleteVariable(int kOfX)
 	}
 
 	ESTreeNode* leafK = locateLeafK(kOfX - 1);	// this is the implementation model, so k -> k-1				
-	ESTreeNode* lastLeaf = _root;	
+	ESTreeNode* lastLeaf = _root;
 
 	while (lastLeaf->_rightChild != NULL)
 	{
@@ -376,20 +385,65 @@ void ESTree::unitTest(string str)
 	}	*/
 }
 
-void ESTree::verifiyESTree(ESTreeNode* root, int& num)
+void ESTree::verifiyESTree(ESTreeNode* node, int& num)
 {
-	if (root != NULL)
+	/*if (root != NULL)
 	{
-		if (root->_leftChild == NULL)
-		{
-			cout << num++ << '\t' << "Leaf " << "\t\t" << root->_add << '\t' << root->_min << '\t' << root->_leafNum << endl;
-		}
-		else
-		{
-			cout << num++ << '\t' << "Internal " << '\t' << root->_add << '\t' << root->_min << '\t' << root->_leafNum << endl;
-		}
-		verifiyESTree((ESTreeNode*)root->_leftChild, num);
-		verifiyESTree((ESTreeNode*)root->_rightChild, num);
+	if (root->_leftChild == NULL)
+	{
+	cout << num++ << '\t' << "Leaf " << "\t\t" << root->_add << '\t' << root->_min << '\t' << root->_leafNum << endl;
 	}
+	else
+	{
+	cout << num++ << '\t' << "Internal " << '\t' << root->_add << '\t' << root->_min << '\t' << root->_leafNum << endl;
+	}
+	verifiyESTree((ESTreeNode*)root->_leftChild, num);
+	verifiyESTree((ESTreeNode*)root->_rightChild, num);
+	}*/
+
+
+	ESTreeNode* root = node;
+	while (root->_parent != NULL)
+	{
+		root = root->_parent;
+	}
+
+	//ofstream outDebug("debug.txt", ios_base::in | ios_base::app);
+	//ofstream out("debug.txt");
+
+	// cout << "debug ESTREE format: (index, add, min, leafNum)" << endl;
+	deque<ESTreeNode*> queue;
+	queue.push_back(root);
+	int count = 1;
+	int level = 0;
+
+	while (queue.empty() == false)
+	{
+		//		outDebug << "level " << level++ << ": ";
+		int size = queue.size();
+		for (int i = 0; i < size; i++)
+		{
+			ESTreeNode* tmp = queue.front();
+			queue.pop_front();
+			if (tmp->_leftChild != NULL)
+			{
+				queue.push_back(tmp->_leftChild);
+				queue.push_back(tmp->_rightChild);
+			}
+			if (tmp->_leftChild != NULL)
+			{
+				outDebug << '(' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+				//out << '(' << count++ << '|' << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			}
+			else
+			{
+				outDebug << "( L: " << tmp->_add << '|' << tmp->_min << '|' << tmp->_leafNum << ')' << '\t';
+			}
+
+		}
+		outDebug << endl;
+	}
+	outDebug << endl;
+
 }
 

@@ -28,4 +28,5 @@ public:
 	X mateOfY(Y);
 
 	void verifiyESTree(ESTreeNode* node);
+	void UnitTest::printRootESTree(AdvancedDSTree *);
 };

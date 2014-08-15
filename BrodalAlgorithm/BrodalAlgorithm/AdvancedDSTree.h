@@ -39,6 +39,7 @@ private:
 	void appendXinRightOfP(X x);
 	void removeXinLeftOfP(X);
 	void moveXFromRight2Left(X, bool);
+	void moveXFromLeft2Right(X, bool);	
 	
 	const vector<Y>& getESValues();
 	
@@ -65,8 +66,9 @@ private:
 
 	void replaceableSetOfP(AdvancedDSTreeNode*, X, X, vector<X> &, vector<X> &);
 	vector<X> getLeftReplaceableSetOfP(AdvancedDSTreeNode*, X);
-	//X determineMinWeightX(AdvancedDSTreeNode* infeasibleNode, X, X, AdvancedDSTreeNode*&);
+	vector<X> getRihgtReplaceableSetOfP(AdvancedDSTreeNode*, X);
 	X replaceMinWeightX(AdvancedDSTreeNode*, Msg);
+	X replaceMinWeightXFromLeft(AdvancedDSTreeNode*, Msg);
 	
 public:
 	AdvancedDSTree();
