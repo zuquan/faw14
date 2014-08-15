@@ -108,7 +108,30 @@ bool cmpXBegInc(X x1, X x2)
 // priority: weight-id order , increasing order
 bool cmpXWeight(X x1, X x2)
 {
-	if (x1._w < x2._w)
+	if (x1._w == x2._w)
+	{
+		if (x1._end == x2._end)
+		{
+			if (x1._begin == x2._begin)
+			{
+				return x1._id < x2._id;
+			}
+			else
+			{
+				return x1._begin > x2._begin;
+			}
+		}
+		else
+		{
+			return x1._end > x2._end;
+		}
+	}
+	else
+	{
+		return x1._w < x2._w;
+	}
+	
+	/*if (x1._w < x2._w)
 	{
 		return true;
 	}
@@ -119,7 +142,7 @@ bool cmpXWeight(X x1, X x2)
 			return true;
 		}
 	}
-	return false;
+	return false;*/
 }
 
 ostream& operator<<(ostream& os, const Y& rhs)
@@ -365,16 +388,41 @@ bool AdvancedDSTree::insertX(X &x)
 				if (it == nodeP->_matched.end())	// b is preempted by vertex from R
 				{
 					msg._b = replaceMinWeightXFromLeft(nodeP, msg);		// call replacement algorithm from left
+					msg._c = 2;
+					if (msg._b._end > nodeP->_values[nodeP->_values.size() - 1])
+					{
+						vector<X> t; t.erase(t.begin());
+					}
 				}
 				else    // replace b with a in the left of P, try to insert b if trans
 				{
-					nodeP->_matched.erase(it);
-					nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._b._begin));
-					nodeP->_matched.push_back(msg._a);
-					nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._a._begin));
-
-					if (msg._c == 1)	// transfer
+					if (msg._c == 2)	// infeasible
 					{
+						vector<X>::iterator it = find(nodeP->_matched.begin(), nodeP->_matched.end(), msg._b);
+						nodeP->_matched.erase(it);
+						nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._b._begin));
+						nodeP->_infeasible.push_back(msg._b);
+						nodeP->_matched.push_back(msg._a);
+						nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._a._begin));						
+					}
+					else    // transfer
+					{
+						// get the transfer x of maximum
+						vector<X> lRSet = getLeftReplaceableSetOfP(nodeP, msg._a);
+						sort(lRSet.begin(), lRSet.end(), cmpX3);
+						if (lRSet[lRSet.size() - 1] != msg._b)
+						{
+							msg._b = lRSet[lRSet.size() - 1];
+						}
+
+						// update the left part of P
+						vector<X>::iterator it = find(nodeP->_matched.begin(), nodeP->_matched.end(), msg._b);
+						nodeP->_matched.erase(it);
+						nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._b._begin));
+						nodeP->_matched.push_back(msg._a);
+						nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._a._begin));
+
+						// insert transferred x in the right of P
 						Msg tempMsg = nodeP->insertX(msg._b);
 						if (tempMsg._c == 2)
 						{
@@ -384,10 +432,30 @@ bool AdvancedDSTree::insertX(X &x)
 						msg._bEmpty = tempMsg._bEmpty;
 						msg._c = tempMsg._c;
 					}
-					else    // infeasible
-					{
-						nodeP->_infeasible.push_back(msg._b);
-					}
+					
+
+
+
+					//nodeP->_matched.erase(it);
+					//nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._b._begin));
+					//nodeP->_matched.push_back(msg._a);
+					//nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._a._begin));
+
+					//if (msg._c == 1)	// transfer
+					//{
+					//	Msg tempMsg = nodeP->insertX(msg._b);
+					//	if (tempMsg._c == 2)
+					//	{
+					//		tempMsg._b = replaceMinWeightX(nodeP, tempMsg);		// call replacement algorithm
+					//	}
+					//	msg._b = tempMsg._b;
+					//	msg._bEmpty = tempMsg._bEmpty;
+					//	msg._c = tempMsg._c;
+					//}
+					//else    // infeasible
+					//{
+					//	nodeP->_infeasible.push_back(msg._b);
+					//}
 				}
 				// end of 3.non-sucessful, a != b
 			}
@@ -1280,6 +1348,38 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 			minX = leftRSet[0];
 			inLeft = true;
 		}
+
+		// if backX == insertedX, there may be a vertex in leftSet has x.end which is greater than rightRset.
+		// otherwise (having other trans matched x), there must not be a x in leftSet having larger x.end.
+		if (transMSet[0] == insertedX)
+		{
+			sort(leftRSet.begin(), leftRSet.end(), cmpX3);
+			sort(rightRSet.begin(), rightRSet.end(), cmpX3);
+			if (leftRSet[leftRSet.size() - 1]._end > rightRSet[rightRSet.size() - 1]._end)
+			{
+				rightRSet = getRihgtReplaceableSetOfP(nodeP, leftRSet[leftRSet.size() - 1]);
+				sort(rightRSet.begin(), rightRSet.end(), cmpXWeight);
+				if (cmpXWeight(rightRSet[0], minX))
+				{
+					minX = rightRSet[0];
+					inLeft = false;
+				}
+			}	
+			//if (cmpX3(insertedX, leftRSet[leftRSet.size() - 1]))
+			//{
+			//	X tmpX = leftRSet[leftRSet.size() - 1];
+			//	// exchange tmpX and insertedX
+			//	vector<X>::iterator it = find(nodeP->_matched.begin(), nodeP->_matched.end(), tmpX);
+			//	nodeP->_matched.erase(it);
+			//	nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], tmpX._begin));
+			//	
+			//	nodeP->_matched.push_back(insertedX);
+			//	nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], insertedX._begin));
+
+			//	insertedX = tmpX;
+			//}
+		}
+
 	}
 
 	// update auxilary trees and sets
@@ -1359,7 +1459,8 @@ X AdvancedDSTree::replaceMinWeightXFromLeft(AdvancedDSTreeNode* nodeP, Msg msg)
 	{
 		nodeP->removeXinRightOfP(minX);		// remove minX
 
-		bool isInsertedX = (leftRSet[leftRSet.size() - 1] == insertedX);	// is the minX the insertedX?
+		sort(leftRSet.begin(), leftRSet.end(), cmpX3);
+		bool isInsertedX = (leftRSet[leftRSet.size() - 1] == insertedX);	// is the maxX the insertedX?
 		nodeP->moveXFromLeft2Right(leftRSet[leftRSet.size() - 1], isInsertedX);	// move from left to right the vertex x having max{x.end}
 
 		if (isInsertedX == false)
