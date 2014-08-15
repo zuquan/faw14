@@ -19,7 +19,7 @@ ofstream olog("replaceLogFAW.txt");
 int main()
 {
 	//open a file
-	generator("input.txt");
+	//generator("input.txt");
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
 	if (!in)
@@ -76,10 +76,10 @@ int main()
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
 
-				  /*if (x._id == 8)
+				  if (x._id == 7)
 				  {
 					  int a = 0;
-				  }			*/	  
+				  }
 				  pTree->insertX(x);
 				  /*outDebug << "x: " << x._id << '\t' << x._begin << '\t' << x._end << '\t' << x._w << endl;
 				  ut->printRootESTree(debugTree);*/
@@ -160,7 +160,7 @@ int main()
 	cout << "end" << endl;
 	olog.close();
 
-	//system("LWCBGNew.exe");
+	system("LWCBGNew.exe");
 
 	//ut = new UnitTest(allExistingX, allExistingY);
 	//ut->unitTestWeightXMatchedSet(pTree);

@@ -14,8 +14,8 @@ bool cmpY(Y y1, Y y2)
 }
 
 // priority: increasing id
-bool cmpXID(X x1, X x2)	
-{	
+bool cmpXID(X x1, X x2)
+{
 	return x1._id < x2._id;
 }
 
@@ -262,7 +262,7 @@ void AdvancedDSTree::splitDSNode(AdvancedDSTreeNode* node, X x)
 
 	node->deleteCurrentESTree();
 	node->_pEETree = new ESTree(leftVecY.size());	// EETree for the left part of P
-	node->_pESTree = new ESTree(rightVecY.size());	
+	node->_pESTree = new ESTree(rightVecY.size());
 
 	leftChild->_variables = node->_variables;	// copy the variables from the parent
 
@@ -317,97 +317,189 @@ bool AdvancedDSTree::adjustXToProper(X& x)
 
 bool AdvancedDSTree::insertX(X &x)
 {
-
-	/*if (adjustXToProper(x) == false)
-	{
-	cout << x._id << " insert fail" << endl;
-	return false;
-	}*/
-	AdvancedDSTreeNode* leaf = locateLeafOfX(x);
-	Msg msg = leaf->insertX(x);		// insert the x into the leaf
+	AdvancedDSTreeNode* nodeP = locateLeafOfX(x);
+	Msg msg = nodeP->insertX(x);		// insert the x into the leaf
 	if (msg._c == 2)
 	{
-		msg._b = replaceMinWeightX(leaf, msg);		// call replaceable algorithm
+		msg._b = replaceMinWeightX(nodeP, msg);		// call replaceable algorithm
 	}
+	AdvancedDSTreeNode* child = nodeP;
+	nodeP = nodeP->_parent;
 
-	while (leaf->_parent != NULL)	//send msg until the root, the msg is from a node to its parent
+	while (nodeP != NULL)	//send msg until the root, the msg is from a child to its parent
 	{
-		// leaf is the current node; the msg comes from its own ES-Tree insert operation
-		if (leaf == leaf->_parent->_leftChild)	// the node is the left child
+		if (child == nodeP->_leftChild)	// msg from the left child
 		{
 			if (msg._aEmpty == false)
 			{
-				leaf->_parent->_matched.push_back(msg._a);
-				leaf->_parent->_pEETree->appendVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->_parent->sizeOfY(leaf->_parent->_values[0], msg._a._begin));
+				nodeP->_matched.push_back(msg._a);
+				nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._a._begin));
 			}
 			if (msg._bEmpty == false)
 			{
 				// questions: is it possible that the b is not in the matched set of the parent?
-				vector<X>::iterator it = find(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), msg._b);
-				leaf->_parent->_matched.erase(it);
-				leaf->_parent->_pEETree->deleteVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->_parent->sizeOfY(leaf->_parent->_values[0], msg._b._begin));
+				vector<X>::iterator it = find(nodeP->_matched.begin(), nodeP->_matched.end(), msg._b);
+				nodeP->_matched.erase(it);
+				nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._b._begin));
 			}
 
 			if (msg._c == 2)	// infeasible
 			{
-				leaf->_parent->_infeasible.push_back(msg._b);
+				nodeP->_infeasible.push_back(msg._b);
 			}
 			else if (msg._c == 1)	// transferred
 			{
-				Msg tempMsg = leaf->_parent->insertX(msg._b);	// if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
+				Msg tempMsg = nodeP->insertX(msg._b);	// if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
 				msg._b = tempMsg._b;
 				msg._bEmpty = tempMsg._bEmpty;
 				msg._c = tempMsg._c;
 				if (tempMsg._c == 2)
 				{
-					msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replacement algorithm
+					msg._b = replaceMinWeightX(nodeP, tempMsg);		// call replacement algorithm
 				}
 			}
 		}
-		else // leaf is right child
+		else // msg from the right child
 		{
-			if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a)//Fail in R
+			if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a)	// Fail in R and kick itself out
 			{
-				/*msg._aEmpty = false;
-				msg._bEmpty = false;
-				msg._a = tempMsg._a;
-				msg._b = tempMsg._a;
-				msg._c = tempMsg._c;*/
 				if (msg._c == 1)
 				{
-					leaf->_parent->_transferred.push_back(msg._a);
+					nodeP->_transferred.push_back(msg._a);
 				}
 				else
 				{
-					leaf->_parent->_infeasible.push_back(msg._a);
+					nodeP->_infeasible.push_back(msg._a);
 				}
+			}
+			else if (msg._c != 0 && find(nodeP->_matched.begin(), nodeP->_matched.end(), msg._b) != nodeP->_matched.end())
+			{
+				// the replacement set R(x) does not change in P; remove minx in P and msg remain the same
+				nodeP->removeX(msg);	// remove the msg._b
+				// add msg._a
+				nodeP->_pESTree->appendVariable(nodeP->sizeOfY(nodeP->_rightChild->_values[0], msg._a._end));
+				nodeP->_matched.push_back(msg._a);
+				nodeP->_matched2.push_back(msg._a);
 			}
 			else
 			{
-				Msg tempMsg = leaf->_parent->insertX(msg._a);
-				// msg._b < tempMsg._b, i.e., msg.b is still in the parent and it should be preempted
-				if (tempMsg._bEmpty == false && msg._bEmpty == false && cmpX3(msg._b, tempMsg._b) == true)		
+				Msg tempMsg = nodeP->insertX(msg._a);
+				if (tempMsg._c == 2)
 				{
-					// remove the msg._b from parent
-					leaf->_parent->removeX(msg);
-					// pull the tempMsg._b back
-					leaf->_parent->appendX(tempMsg);
+					tempMsg._b = replaceMinWeightX(nodeP, tempMsg);		// call replacement algorithm
 				}
-				else if (tempMsg._bEmpty == true && msg._bEmpty != true)	// msg.b is in the parent
+				msg = tempMsg;
+
+				if (tempMsg._c == 0 && msg._c != 0)
 				{
-					leaf->_parent->removeX(msg);
+					vector<X> t; t.erase(t.begin());
 				}
-				else
-				{
-					msg._b = tempMsg._b;
-					msg._bEmpty = tempMsg._bEmpty;
-					msg._c = tempMsg._c;
-				}
+				
+				//if (msg._c == 0)
+				//{
+				//	msg = tempMsg;
+				//}
+				//else if (msg._c == 1)
+				//{
+				//	if (tempMsg._c == 0)
+				//	{
+				//		vector<X> t; t.erase(t.begin);
+				//	}
+				//	msg = tempMsg;
+				//}
+				//else   // msg._c == 2
+				//{
+				//	msg = tempMsg;
+				//}
 
 			}
 		}
-		leaf = leaf->_parent;
+		child = nodeP;
+		nodeP = nodeP->_parent;
 	}
+
+
+	//AdvancedDSTreeNode* leaf = locateLeafOfX(x);
+	//Msg msg = leaf->insertX(x);		// insert the x into the leaf
+	//if (msg._c == 2)
+	//{
+	//	msg._b = replaceMinWeightX(leaf, msg);		// call replaceable algorithm
+	//}
+
+	//while (leaf->_parent != NULL)	//send msg until the root, the msg is from a node to its parent
+	//{
+	//	// leaf is the current node; the msg comes from its own ES-Tree insert operation
+	//	if (leaf == leaf->_parent->_leftChild)	// the node is the left child
+	//	{
+	//		if (msg._aEmpty == false)
+	//		{
+	//			leaf->_parent->_matched.push_back(msg._a);
+	//			leaf->_parent->_pEETree->appendVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->_parent->sizeOfY(leaf->_parent->_values[0], msg._a._begin));
+	//		}
+	//		if (msg._bEmpty == false)
+	//		{
+	//			// questions: is it possible that the b is not in the matched set of the parent?
+	//			vector<X>::iterator it = find(leaf->_parent->_matched.begin(), leaf->_parent->_matched.end(), msg._b);
+	//			leaf->_parent->_matched.erase(it);
+	//			leaf->_parent->_pEETree->deleteVariable(leaf->_parent->_pEETree->allLeafNum() - leaf->_parent->sizeOfY(leaf->_parent->_values[0], msg._b._begin));
+	//		}
+
+	//		if (msg._c == 2)	// infeasible
+	//		{
+	//			leaf->_parent->_infeasible.push_back(msg._b);
+	//		}
+	//		else if (msg._c == 1)	// transferred
+	//		{
+	//			Msg tempMsg = leaf->_parent->insertX(msg._b);	// if tempMsg._b <> msg._b, then msg._b remains in the matched set of the parent
+	//			msg._b = tempMsg._b;
+	//			msg._bEmpty = tempMsg._bEmpty;
+	//			msg._c = tempMsg._c;
+	//			if (tempMsg._c == 2)
+	//			{
+	//				msg._b = replaceMinWeightX(leaf->_parent, tempMsg);		// call replacement algorithm
+	//			}
+	//		}
+	//	}
+	//	else // leaf is right child
+	//	{
+	//		if (msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a)//Fail in R
+	//		{
+	//			if (msg._c == 1)
+	//			{
+	//				leaf->_parent->_transferred.push_back(msg._a);
+	//			}
+	//			else
+	//			{
+	//				leaf->_parent->_infeasible.push_back(msg._a);
+	//			}
+	//		}
+	//		else
+	//		{
+	//			Msg tempMsg = leaf->_parent->insertX(msg._a);
+	//			// msg._b < tempMsg._b, i.e., msg.b is still in the parent and it should be preempted
+	//			if (tempMsg._bEmpty == false && msg._bEmpty == false && cmpX3(msg._b, tempMsg._b) == true)
+	//			{
+	//				// remove the msg._b from parent
+	//				leaf->_parent->removeX(msg);
+	//				// pull the tempMsg._b back
+	//				leaf->_parent->appendX(tempMsg);
+	//			}
+	//			else if (tempMsg._bEmpty == true && msg._bEmpty != true)	// msg.b is in the parent
+	//			{
+	//				leaf->_parent->removeX(msg);
+	//			}
+	//			else
+	//			{
+	//				msg._b = tempMsg._b;
+	//				msg._bEmpty = tempMsg._bEmpty;
+	//				msg._c = tempMsg._c;
+	//			}
+
+	//		}
+	//	}
+	//	leaf = leaf->_parent;
+	//}
+
 
 	if (!(msg._bEmpty == false && msg._aEmpty == false && msg._b == msg._a))	// if a==b, do nothing
 	{
@@ -472,6 +564,7 @@ void AdvancedDSTreeNode::removeXinLeftOfP(X x)
 	_pEETree->deleteVariable(_pEETree->allLeafNum() - sizeOfY(_values[0], x._begin));
 	vector<X>::iterator it = find(_matched.begin(), _matched.end(), x);
 	_matched.erase(it);
+	_infeasible.push_back(x);
 }
 
 void AdvancedDSTreeNode::appendX(Msg m)
@@ -496,19 +589,26 @@ void AdvancedDSTreeNode::appendX(Msg m)
 void AdvancedDSTreeNode::appendXinRightOfP(X x)
 {
 	_pESTree->appendVariable(sizeOfY(getESValues()[0], x._end));
-	//_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY((*pESValues)[0], x._begin));
 	_matched.push_back(x);
 	_matched2.push_back(x);
 }
 
 // move transferred matched x from right to Left of P, updating EETree, ESTree and Matched2 set
-void AdvancedDSTreeNode::moveXFromRight2Left(X x)
+void AdvancedDSTreeNode::moveXFromRight2Left(X x, bool isInsertedX)
 {	
-	_pESTree->deleteVariable(sizeOfY(getESValues()[0], x._end));
-	_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(_values[0], x._begin));
-
-	vector<X>::iterator it1 = find(_matched2.begin(), _matched2.end(), x);
-	_matched2.erase(it1);
+	if (isInsertedX == false)	// if not insertedX
+	{
+		_pESTree->deleteVariable(sizeOfY(getESValues()[0], x._end));
+		vector<X>::iterator it1 = find(_matched2.begin(), _matched2.end(), x);
+		_matched2.erase(it1);
+		_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(_values[0], x._begin));
+	}
+	else
+	{
+		_pEETree->appendVariable(_pEETree->allLeafNum() - sizeOfY(_values[0], x._begin));
+		_matched.push_back(x);
+	}
+	
 }
 
 // compute the size between the start and the end; 
@@ -553,7 +653,10 @@ void AdvancedDSTreeNode::deleteCurrentESTree(ESTreeNode* currentNode)
 void AdvancedDSTreeNode::deleteCurrentESTree()
 {
 	deleteCurrentESTree(this->_pESTree->_root);
-	deleteCurrentESTree(this->_pEETree->_root);
+	if (this->_pEETree != NULL)
+	{
+		deleteCurrentESTree(this->_pEETree->_root);
+	}
 }
 
 
@@ -752,7 +855,7 @@ void AdvancedDSTreeNode::queryUpdateNodeW()
 	{
 		/*if ((*itUpdateList)._id == 12)
 		{
-			int ad = 0;
+		int ad = 0;
 		}*/
 		vector<X>::iterator itMatching = find(_matching.begin(), _matching.end(), *itUpdateList);
 		if (itMatching != _matching.end())	// in matching
@@ -956,11 +1059,12 @@ void AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x1, X jX, vec
 	}
 	rset.push_back(x1);	// add the inserted x iteself
 
-	sort(rset.begin(), rset.end(), cmpXBegInc);		
+	sort(rset.begin(), rset.end(), cmpXBegInc);
 	int i = 0;
-	while (rset[i]._begin < node->getESValues()[0])
+	while (i < rset.size() && rset[i]._begin < node->getESValues()[0])
 	{
 		tMset.push_back(rset[i]);
+		i++;
 	}
 }
 
@@ -1079,9 +1183,14 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 	if (inLeft)
 	{
 		nodeP->removeXinLeftOfP(minX);	// remove minX
+				
 		sort(transMSet.begin(), transMSet.end(), cmpX3);	// increasing x.end
-		nodeP->moveXFromRight2Left(transMSet[0]);	// move from right to left the transferred matched vertex x having min{x.end}
-		nodeP->appendXinRightOfP(insertedX);	// add insertedX
+		bool isInsertedX = (transMSet[0] == insertedX);
+		nodeP->moveXFromRight2Left(transMSet[0], isInsertedX);	// move from right to left the transferred matched vertex x having min{x.end}
+		if (isInsertedX == false)
+		{
+			nodeP->appendXinRightOfP(insertedX);	// add insertedX
+		}
 	}
 	else
 	{

@@ -38,7 +38,7 @@ private:
 	void removeXinRightOfP(X x);
 	void appendXinRightOfP(X x);
 	void removeXinLeftOfP(X);
-	void moveXFromRight2Left(X);
+	void moveXFromRight2Left(X, bool);
 	
 	const vector<Y>& getESValues();
 	

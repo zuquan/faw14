@@ -62,6 +62,15 @@ struct Msg
 	bool _bEmpty;
 	X _b;
 	int _c; //c==0, null; c==1, transferred; c==2, infeasible
+
+	void operator=(const Msg& rhs)
+	{
+		this->_a = rhs._a;
+		this->_aEmpty = rhs._aEmpty;
+		this->_b = rhs._b;
+		this->_bEmpty = rhs._bEmpty;
+		this->_c = rhs._c;
+	}
 };
 
 
