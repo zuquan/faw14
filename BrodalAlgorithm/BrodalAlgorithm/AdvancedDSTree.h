@@ -66,9 +66,11 @@ private:
 	Y gloverMatchingInLeafForAnX(AdvancedDSTreeNode*, X);
 	X gloverMatchingInLeafForAnY(AdvancedDSTreeNode*, Y);
 
-	void replaceableSetOfP(AdvancedDSTreeNode*, X, X, vector<X> &, vector<X> &);
+	//void replaceableSetOfP(AdvancedDSTreeNode*, X, X, vector<X> &, vector<X> &);
 	vector<X> getLeftReplaceableSetOfP(AdvancedDSTreeNode*, X);
 	vector<X> getRihgtReplaceableSetOfP(AdvancedDSTreeNode*, X);
+	vector<X> getTransMatchedSet(AdvancedDSTreeNode*, vector<X> &);	
+
 	X replaceMinWeightX(AdvancedDSTreeNode*, Msg);
 	X replaceMinWeightXFromLeft(AdvancedDSTreeNode*, Msg);
 	
