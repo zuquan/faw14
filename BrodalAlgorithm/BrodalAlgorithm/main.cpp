@@ -21,7 +21,7 @@ int main()
 {
 	//open a file
 	//generator("input.txt");
-	//system("LWCBGNew.exe");
+	
 	ifstream in("input.txt");
 	ofstream out("outputMain.txt");
 	if (!in)
@@ -76,7 +76,7 @@ int main()
 					  allExistingX.push_back(x);	// to be checked
 				  }				  
 
-				  if (x._id == 9)
+				  if (x._id == 19)
 				  {
 					  int a = 0;
 				  }
@@ -160,7 +160,8 @@ int main()
 	cout << "end" << endl;
 	olog.close();
 
-	
+	system("LWCBGNew.exe");
+	//system("cls");
 
 	//ut = new UnitTest(allExistingX, allExistingY);
 	//ut->unitTestWeightXMatchedSet(pTree);

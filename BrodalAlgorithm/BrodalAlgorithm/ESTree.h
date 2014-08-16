@@ -34,6 +34,8 @@ private:
 	ESTreeNode* locateLeafK(int k);
 	ESTreeNode* locateLeafJ(ESTreeNode*);
 	void updateBjFromK2J(ESTreeNode* leafK, ESTreeNode* leafJ, int diff);
+
+	ESTreeNode* locateLeafL(ESTreeNode*);	// the a_j=j before k
 	
 
 	//auxiluary fuction
@@ -59,5 +61,6 @@ public:
 	void appendVariable(int);
 
 	int getLbyK(int);
+	int get2ndLbyK(int);
 };
 

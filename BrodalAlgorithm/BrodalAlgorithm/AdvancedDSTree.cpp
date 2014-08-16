@@ -130,17 +130,17 @@ bool cmpXWeight(X x1, X x2)
 	{
 		return x1._w < x2._w;
 	}
-	
+
 	/*if (x1._w < x2._w)
 	{
-		return true;
+	return true;
 	}
 	else
 	{
-		if (x1._w == x2._w && x1._id < x2._id)
-		{
-			return true;
-		}
+	if (x1._w == x2._w && x1._id < x2._id)
+	{
+	return true;
+	}
 	}
 	return false;*/
 }
@@ -403,12 +403,13 @@ bool AdvancedDSTree::insertX(X &x)
 						nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._b._begin));
 						nodeP->_infeasible.push_back(msg._b);
 						nodeP->_matched.push_back(msg._a);
-						nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._a._begin));						
+						nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], msg._a._begin));
 					}
 					else    // transfer
 					{
 						// get the transfer x of maximum
 						vector<X> lRSet = getLeftReplaceableSetOfP(nodeP, msg._a);
+						lRSet.push_back(msg._a);
 						sort(lRSet.begin(), lRSet.end(), cmpX3);
 						if (lRSet[lRSet.size() - 1] != msg._b)
 						{
@@ -432,7 +433,7 @@ bool AdvancedDSTree::insertX(X &x)
 						msg._bEmpty = tempMsg._bEmpty;
 						msg._c = tempMsg._c;
 					}
-					
+
 
 
 
@@ -1223,6 +1224,7 @@ void AdvancedDSTree::replaceableSetOfP(AdvancedDSTreeNode* node, X x1, X jX, vec
 }
 
 // return the replacement set in the left part of P. x is the inserted vertex.
+// NOTE: the result set does not contain the reference vertex x.
 vector<X> AdvancedDSTree::getLeftReplaceableSetOfP(AdvancedDSTreeNode* node, X x)
 {
 	vector<X> leftSet;
@@ -1230,9 +1232,9 @@ vector<X> AdvancedDSTree::getLeftReplaceableSetOfP(AdvancedDSTreeNode* node, X x
 	sort(node->_matched2.begin(), node->_matched2.end(), cmpXID);
 	int i = 0;
 	int j = 0;
-	while (j < node->_matched2.size())
+	while (i < node->_matched.size() && j < node->_matched2.size())
 	{
-		if (!(node->_matched[i] == node->_matched2[j]))
+		if (node->_matched[i] != node->_matched2[j])
 		{
 			leftSet.push_back(node->_matched[i]);
 			i++;
@@ -1261,16 +1263,18 @@ vector<X> AdvancedDSTree::getLeftReplaceableSetOfP(AdvancedDSTreeNode* node, X x
 	}
 
 	sort(leftSet.begin(), leftSet.end(), cmpXBegDec);
+	// the tight point l means there are l x vertices should be picked
 	for (int i = 0; i < l; i++)
 	{
 		rset.push_back(leftSet[i]);
 	}
-	rset.push_back(x);	// add the inserted x iteself
+	//rset.push_back(x);	// add the inserted x iteself	// remove it, if needed, add it manually outside
 
 	return rset;
 }
 
 // return the replacement set in the left part of P. x is the inserted vertex.
+// NOTE: does not contain the reference x.
 vector<X> AdvancedDSTree::getRihgtReplaceableSetOfP(AdvancedDSTreeNode* node, X x)
 {
 	vector<X> rset;
@@ -1287,7 +1291,7 @@ vector<X> AdvancedDSTree::getRihgtReplaceableSetOfP(AdvancedDSTreeNode* node, X 
 	{
 		rset.push_back(node->_matched2[i]);
 	}
-	rset.push_back(x);	// add the inserted x iteself
+	// rset.push_back(x);	// add the inserted x iteself	// should not contain the reference x
 
 	return rset;
 }
@@ -1304,6 +1308,53 @@ const vector<Y>& AdvancedDSTreeNode::getESValues()
 		return _values;
 	}
 }
+
+// get the set which can replace minX and pick the one with maximum end
+X AdvancedDSTreeNode::getBackX(vector<X> transMSet, X minX)
+{
+	Y refY;
+	if (minX._begin == _values[_values.size() - _rightChild->_values.size() - 1])
+	{
+		refY = _rightChild->_values[0];
+	}
+	else
+	{
+		int kOfX = sizeOfY(_values[0], minX._begin);
+		int l2 = _pEETree->get2ndLbyK(_pEETree->allLeafNum() - kOfX);	// m+1-k'
+		int p = _values.size() - _rightChild->_values.size() - l2 + 1;
+
+		if (l2 == 0)
+		{
+			refY = _rightChild->_values[0];
+		}
+		else
+		{
+			refY = _values[p - 1];
+		}
+	}
+
+	vector<X> refS;
+	for (int i = 0; i < transMSet.size(); i++)
+	{
+		if (transMSet[i]._begin < refY)
+		{
+			refS.push_back(transMSet[i]);
+		}
+	}
+
+	if (refS.empty())
+	{
+		vector<X> t; t.erase(t.begin());
+	}
+	sort(refS.begin(), refS.end(), cmpX3);
+	return refS[0];
+}
+
+//// get the set which can replace minX and pick the 
+//X AdvancedDSTreeNode::getForwardX(vector<X> transMSet, X minX)
+//{
+//	
+//}
 
 // insertedX is the x vertex added into the node P
 X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
@@ -1338,10 +1389,11 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 	minX = rightRSet[0];
 
 	if (!transMSet.empty())		// there is at least a transferred X matchs 1-j
-	{
+	{	
 		// get the R(x) by EE-Tree
 		sort(transMSet.begin(), transMSet.end(), cmpXBegInc);	// increasing x.begin, get x with min begin
-		leftRSet = getLeftReplaceableSetOfP(nodeP, transMSet[0]);
+		X refBackX = transMSet[0];
+		leftRSet = getLeftReplaceableSetOfP(nodeP, refBackX);
 		sort(leftRSet.begin(), leftRSet.end(), cmpXWeight);
 		if (cmpXWeight(leftRSet[0], minX))
 		{
@@ -1351,8 +1403,8 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 
 		// if backX == insertedX, there may be a vertex in leftSet has x.end which is greater than rightRset.
 		// otherwise (having other trans matched x), there must not be a x in leftSet having larger x.end.
-		if (transMSet[0] == insertedX)
-		{
+		if (refBackX == insertedX)
+		{	
 			sort(leftRSet.begin(), leftRSet.end(), cmpX3);
 			sort(rightRSet.begin(), rightRSet.end(), cmpX3);
 			if (leftRSet[leftRSet.size() - 1]._end > rightRSet[rightRSet.size() - 1]._end)
@@ -1364,20 +1416,23 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 					minX = rightRSet[0];
 					inLeft = false;
 				}
-			}	
-			//if (cmpX3(insertedX, leftRSet[leftRSet.size() - 1]))
-			//{
-			//	X tmpX = leftRSet[leftRSet.size() - 1];
-			//	// exchange tmpX and insertedX
-			//	vector<X>::iterator it = find(nodeP->_matched.begin(), nodeP->_matched.end(), tmpX);
-			//	nodeP->_matched.erase(it);
-			//	nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], tmpX._begin));
-			//	
-			//	nodeP->_matched.push_back(insertedX);
-			//	nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], insertedX._begin));
+			}
+			if (minX != insertedX && cmpX3(insertedX, leftRSet[leftRSet.size() - 1]))
+			{
+				X forwardX = leftRSet[leftRSet.size() - 1];
+				// exchange tmpX and insertedX
+				vector<X>::iterator it = find(nodeP->_matched.begin(), nodeP->_matched.end(), forwardX);
+				nodeP->_matched.erase(it);
+				nodeP->_pEETree->deleteVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], forwardX._begin));
 
-			//	insertedX = tmpX;
-			//}
+				nodeP->_matched.push_back(insertedX);
+				nodeP->_pEETree->appendVariable(nodeP->_pEETree->allLeafNum() - nodeP->sizeOfY(nodeP->_values[0], insertedX._begin));
+
+				it = find(transMSet.begin(), transMSet.end(), insertedX);
+				transMSet.erase(it);
+				transMSet.push_back(forwardX);
+				insertedX = forwardX;
+			}
 		}
 
 	}
@@ -1391,11 +1446,11 @@ X AdvancedDSTree::replaceMinWeightX(AdvancedDSTreeNode* nodeP, Msg msg)
 
 	if (inLeft)
 	{
-		nodeP->removeXinLeftOfP(minX);	// remove minX
+		X backX = nodeP->getBackX(transMSet, minX);		// get the backX using the get2ndLbyK
 
-		sort(transMSet.begin(), transMSet.end(), cmpX3);	// increasing x.end
-		bool isInsertedX = (transMSet[0] == insertedX);
-		nodeP->moveXFromRight2Left(transMSet[0], isInsertedX);	// move from right to left the transferred matched vertex x having min{x.end}
+		nodeP->removeXinLeftOfP(minX);	// remove minX
+		bool isInsertedX = (backX == insertedX);
+		nodeP->moveXFromRight2Left(backX, isInsertedX);	// move from right to left the transferred matched vertex x having min{x.end}
 
 		if (isInsertedX == false)
 		{
@@ -1421,6 +1476,7 @@ X AdvancedDSTree::replaceMinWeightXFromLeft(AdvancedDSTreeNode* nodeP, Msg msg)
 
 	// get left replacement set
 	leftRSet = getLeftReplaceableSetOfP(nodeP, insertedX);
+	leftRSet.push_back(insertedX);
 	sort(leftRSet.begin(), leftRSet.end(), cmpXWeight);
 	minX = leftRSet[0];
 
@@ -1436,6 +1492,22 @@ X AdvancedDSTree::replaceMinWeightXFromLeft(AdvancedDSTreeNode* nodeP, Msg msg)
 	{
 		minX = rightRSet[0];
 		inLeft = false;
+	}
+
+	// change whether there is a x of right has smaller begin
+	sort(rightRSet.begin(), rightRSet.end(), cmpXBegInc);
+	sort(leftRSet.begin(), leftRSet.end(), cmpXBegInc);
+	if (rightRSet[0]._begin < leftRSet[0]._begin)
+	{
+		leftRSet.clear();
+		leftRSet = getLeftReplaceableSetOfP(nodeP, rightRSet[0]);
+		leftRSet.push_back(insertedX);
+		sort(leftRSet.begin(), leftRSet.end(), cmpXWeight);
+		if (cmpXWeight(leftRSet[0], minX))
+		{
+			minX = leftRSet[0];
+			inLeft = true;
+		}
 	}
 
 	// update auxilary trees and sets
@@ -1457,6 +1529,9 @@ X AdvancedDSTree::replaceMinWeightXFromLeft(AdvancedDSTreeNode* nodeP, Msg msg)
 	}
 	else
 	{
+		// do NOT need forwardX? since 1. all x can be replaced by insertedX, 2. the maxX must can replace the minX.
+		//X forwardX = nodeP->getForwardX(leftRSet, minX);		// get the backX using the get2ndLbyK
+
 		nodeP->removeXinRightOfP(minX);		// remove minX
 
 		sort(leftRSet.begin(), leftRSet.end(), cmpX3);

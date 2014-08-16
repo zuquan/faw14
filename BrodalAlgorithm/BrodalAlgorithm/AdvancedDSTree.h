@@ -42,6 +42,8 @@ private:
 	void moveXFromLeft2Right(X, bool);	
 	
 	const vector<Y>& getESValues();
+	X getBackX(vector<X> transMSet, X minX);
+	X getForwardX(vector<X> , X );
 	
 public:
 	AdvancedDSTreeNode(vector<Y>);
