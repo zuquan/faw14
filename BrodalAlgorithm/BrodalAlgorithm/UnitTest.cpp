@@ -166,9 +166,9 @@ void generator(char* fileName)
 {
 
 
-	int range = 10;
-	int xnum = 20;
-	int maxw = 100;
+	int range = 50;
+	int xnum = 200;
+	int maxw = 1000;
 
 
 	/*cout << "input range of Y" << endl;
